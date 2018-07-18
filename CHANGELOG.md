@@ -2,7 +2,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+[Added]
 - Classes SimpleSAML_Logger and SimpleSAML_Module renamed to SimpleSAML\Logger and SimpleSAML\Module
+- Dictionary
+- Czech translation
 
 ## [v1.1.0]
 [Added]

@@ -1,0 +1,90 @@
+{
+  "summary": {
+    "en": "Summary",
+    "cs": "Shrnutí"
+  },
+  "templates/statistics-tpl_graphs": {
+    "en": "Graphs",
+    "cs": "Grafy"
+  },
+  "templates/statistics-tpl_tables": {
+    "en": "Tables",
+    "cs": "Tabulky"
+  },
+  "templates/summary_overall_logins": {
+    "en": "Overall number of logins",
+    "cs": "Celkový počet přihlášení"
+  },
+  "templates/summary_accessed_providers": {
+    "en": "Total number of accessed service providers",
+    "cs": "Celkový počet používaných služeb"
+  },
+  "templates/summary_used_identity_providers": {
+    "en": "Total number of used identity providers",
+    "cs": "Celkový počet použitých poskytovatelů identit"
+  },
+  "templates/summary_logins_today": {
+    "en": "Number of logins for today",
+    "cs": "Počet přihlášení během dnešního dne"
+  },
+  "templates/summary_average_logins": {
+    "en": "Average number of logins per day",
+    "cs": "Průměrný počet přihlášení za den"
+  },
+  "templates/summary_max_logins": {
+    "en": "Maximal number of logins per day",
+    "cs": "Maximální počet přihlášení za den"
+  },
+  "templates/summary_name": {
+    "en": "Name",
+    "cs": "Jméno"
+  },
+  "templates/count": {
+    "en": "Count",
+    "cs": "Počet"
+  },
+  "templates/graphs_logins": {
+    "en": "Number of logins",
+    "cs": "Počet přihlášení"
+  },
+  "templates/graphs_id_providers": {
+    "en": "Identity providers",
+    "cs": "Poskytovatelé identit"
+  },
+  "templates/graphs_service_providers": {
+    "en": "Service providers",
+    "cs": "Poskytovatelé služeb"
+  },
+  "templates/logins_day": {
+    "en": "Number of logins per day",
+    "cs": "Počet přihlášení za den"
+  },
+  "templates/logins_identity": {
+    "en": "Overall logins per identity provider",
+    "cs": "Počet přihlášení podle poskytovatele identity"
+  },
+  "templates/logins_service": {
+    "en": "Overall logins to service providers",
+    "cs": "Počet přihlášení ke službám"
+  },
+  "templates/tables_date": {
+    "en": "Date",
+    "cs": "Datum"
+  },
+  "templates/tables_month": {
+    "en": "Month",
+    "cs": "Měsíc"
+  },
+  "templates/tables_identity_provider": {
+    "en": "Identity provider",
+    "cs": "Poskytovatel identity"
+  },
+  "templates/tables_service_provider": {
+    "en": "Service provider",
+    "cs": "Služba"
+  },
+  "templates/statistics_header": {
+    "en": "SimpleSAMLphp Statistics",
+    "cs": "SimpleSAMLphp Statistiky"
+  }
+}
