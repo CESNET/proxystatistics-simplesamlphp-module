@@ -4,7 +4,7 @@ include dirname(__DIR__)."/lib/Auth/Process/DatabaseCommand.php";
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
  */
 ?>
-<link rel="stylesheet"  media="screen" type="text/css" href="<?php SimpleSAML_Module::getModuleUrl('proxystatistics/statisticsproxy.css')?>" />
+<link rel="stylesheet"  media="screen" type="text/css" href="<?php SimpleSAML\Module::getModuleUrl('proxystatistics/statisticsproxy.css')?>" />
 <h2>Number of logins per day</h2>
 <div id="tableOfAllLogin">
     <script type="text/javascript">
