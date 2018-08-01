@@ -18,15 +18,15 @@ class DatabaseCommand
         $service = $request['Destination']['name']['en'];
 
         $sql = "INSERT INTO ".$identityProvidersTableName."(year, month, day, sourceIdp, count) VALUES ('".$date->format('Y')."','".$date->format('m')  ."','".$date->format('d')."','".$sourceIdp."','1') ON DUPLICATE KEY UPDATE count = count + 1";
-        SimpleSAML_Logger::info($sql);
+        SimpleSAML\Logger::info($sql);
         if ($conn->query($sql) === FALSE) {
-            SimpleSAML_Logger::error("The login log wasn't inserted into the database.");
+            SimpleSAML\Logger::error("The login log wasn't inserted into the database.");
         }
 
         $sql = "INSERT INTO ".$serviceProvidersTableName."(year, month, day, service, count) VALUES ('".$date->format('Y')."','".$date->format('m')  ."','".$date->format('d')."','".$service."','1') ON DUPLICATE KEY UPDATE count = count + 1";
-        SimpleSAML_Logger::info($sql);
+        SimpleSAML\Logger::info($sql);
         if ($conn->query($sql) === FALSE) {
-            SimpleSAML_Logger::error("The login log wasn't inserted into the database.");
+            SimpleSAML\Logger::error("The login log wasn't inserted into the database.");
         }
 
         $conn->close();
