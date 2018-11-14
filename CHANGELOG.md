@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+[Changed]
+- 100% of screen width is used now
 
 ## [v1.4.0]
 [Added]
