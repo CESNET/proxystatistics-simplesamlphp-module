@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 [Added]
 -Added file phpcs.xml
 
+[Changed]
+- Changed code style to PSR-2
+
 ## [v2.1.0]
 [Added]
 - Every successfully log in is logged with notice level 

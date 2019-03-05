@@ -32,13 +32,14 @@ $result = '';
 $line = null;
 
 // Identity providers part
-$file = fopen($identityProvidersFileName,"r");
+$file = fopen($identityProvidersFileName, "r");
 
-while(!feof($file))
-{
-    $line=(fgetcsv($file));
-    if($line != null) {
-        $lineInsert = 'INSERT INTO ' . $tableName . '(year, month, day, sourceIdp, service, count) VALUES(' . $line[0] . ', ' . $line[1] . ', ' . $line[2] . ', "' . $line[3] . '","" , ' . $line[4] . ');' . PHP_EOL;
+while (!feof($file)) {
+    $line = (fgetcsv($file));
+    if ($line != null) {
+        $lineInsert = 'INSERT INTO ' . $tableName . '(year, month, day, sourceIdp, service, count) ' .
+            'VALUES(' . $line[0] . ', ' . $line[1] . ', ' . $line[2] . ', "' . $line[3] . '","" , ' . $line[4] . ');' .
+            PHP_EOL;
         $result .= $lineInsert;
     }
 }
@@ -46,13 +47,14 @@ while(!feof($file))
 fclose($file);
 
 // Service providers part
-$file = fopen($serviceProvidersFileName,"r");
+$file = fopen($serviceProvidersFileName, "r");
 
-while(!feof($file))
-{
-    $line=(fgetcsv($file));
-    if($line != null) {
-        $lineInsert = 'INSERT INTO ' . $tableName . '(year, month, day, sourceIdp, service, count) VALUES(' . $line[0] . ', ' . $line[1] . ', ' . $line[2] . ', "", "' . $line[3] . '", ' . $line[4] . ');' . PHP_EOL;
+while (!feof($file)) {
+    $line = (fgetcsv($file));
+    if ($line != null) {
+        $lineInsert = 'INSERT INTO ' . $tableName . '(year, month, day, sourceIdp, service, count) ' .
+            'VALUES(' . $line[0] . ', ' . $line[1] . ', ' . $line[2] . ', "", "' . $line[3] . '", ' . $line[4] . ');' .
+            PHP_EOL;
         $result .= $lineInsert;
     }
 }

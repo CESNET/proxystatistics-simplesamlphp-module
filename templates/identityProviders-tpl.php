@@ -1,5 +1,5 @@
 <?php
-include dirname(__DIR__)."/lib/Auth/Process/DatabaseCommand.php";
+include dirname(__DIR__) . "/lib/Auth/Process/DatabaseCommand.php";
 /**
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
  * @author Dominik Baránek <0Baranek.dominik0@gmail.com>
@@ -7,27 +7,28 @@ include dirname(__DIR__)."/lib/Auth/Process/DatabaseCommand.php";
 $lastDays = $this->data['lastDays'];
 
 ?>
-<link rel="stylesheet"  media="screen" type="text/css" href="<?php SimpleSAML_Module::getModuleUrl('proxystatistics/statisticsproxy.css')?>" />
+<link rel="stylesheet" media="screen" type="text/css"
+      href="<?php SimpleSAML_Module::getModuleUrl('proxystatistics/statisticsproxy.css') ?>"/>
 <script type="text/javascript">
-    google.charts.load('current', {'packages':['corechart', 'table']});
+    google.charts.load('current', {'packages': ['corechart', 'table']});
     google.charts.setOnLoadCallback(drawIdpsChart);
     google.charts.setOnLoadCallback(drawIdpsTable);
 
     function drawIdpsChart() {
         var data = google.visualization.arrayToDataTable([
             ['sourceIdp', 'sourceIdPEntityId', 'Count'],
-			<?php DatabaseCommand::getLoginCountPerIdp($lastDays)?>
+            <?php DatabaseCommand::getLoginCountPerIdp($lastDays)?>
         ]);
 
         data.sort([{column: 2, desc: true}]);
 
         var view = new google.visualization.DataView(data);
 
-        view.setColumns([0,2]);
+        view.setColumns([0, 2]);
 
         var options = {
             pieSliceText: 'value',
-            chartArea:{left:20,top:0,width:'100%',height:'100%'},
+            chartArea: {left: 20, top: 0, width: '100%', height: '100%'},
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('idpsChartDetail'));
@@ -47,16 +48,22 @@ $lastDays = $this->data['lastDays'];
     function drawIdpsTable() {
         var data = new google.visualization.DataTable();
 
-        data.addColumn('string', '<?php echo $this->t('{proxystatistics:Proxystatistics:templates/tables_identity_provider}'); ?>');
-        data.addColumn('string', '<?php echo $this->t('{proxystatistics:Proxystatistics:templates/tables_identity_provider}'); ?>');
-        data.addColumn('number', '<?php echo $this->t('{proxystatistics:Proxystatistics:templates/count}'); ?>');
+        data.addColumn(
+            'string', '<?php echo $this->t('{proxystatistics:Proxystatistics:templates/tables_identity_provider}'); ?>'
+        );
+        data.addColumn(
+            'string', '<?php echo $this->t('{proxystatistics:Proxystatistics:templates/tables_identity_provider}'); ?>'
+        );
+        data.addColumn(
+            'number', '<?php echo $this->t('{proxystatistics:Proxystatistics:templates/count}'); ?>'
+        );
         data.addRows([<?php DatabaseCommand::getLoginCountPerIdp($lastDays)?>]);
 
         data.sort([{column: 2, desc: true}]);
 
         var view = new google.visualization.DataView(data);
 
-        view.setColumns([0,2]);
+        view.setColumns([0, 2]);
 
         var table = new google.visualization.Table(document.getElementById('idpsTable'));
 
@@ -79,19 +86,27 @@ $lastDays = $this->data['lastDays'];
 <body>
 <div class="timeRange">
     <h4><?php echo $this->t('{proxystatistics:Proxystatistics:templates_time_range}'); ?></h4>
-    <form id="dateSelector" method="post" >
+    <form id="dateSelector" method="post">
         <input name="tab" value="2" hidden>
         <label>
-            <input id="1" type="radio" name="lastDays" value=0 onclick="this.form.submit()" <?php echo ($lastDays == 0) ? "checked=true" : ""  ?> > <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_all}'); ?>
+            <input id="1" type="radio" name="lastDays" value=0
+                   onclick="this.form.submit()"<?php echo ($lastDays == 0) ? "checked=true" : "" ?>>
+            <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_all}'); ?>
         </label>
         <label>
-            <input id="2" type="radio" name="lastDays" value=7 onclick="this.form.submit()" <?php echo ($lastDays == 7) ? "checked=true" : "" ?>> <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_week}'); ?>
+            <input id="2" type="radio" name="lastDays" value=7
+                   onclick="this.form.submit()" <?php echo ($lastDays == 7) ? "checked=true" : "" ?>>
+            <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_week}'); ?>
         </label>
         <label>
-            <input id="3" type="radio" name="lastDays" value=30 onclick="this.form.submit()" <?php echo ($lastDays == 30) ? "checked=true" : "" ?>> <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_month}'); ?>
+            <input id="3" type="radio" name="lastDays" value=30
+                   onclick="this.form.submit()" <?php echo ($lastDays == 30) ? "checked=true" : "" ?>>
+            <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_month}'); ?>
         </label>
         <label>
-            <input id="4" type="radio" name="lastDays" value=365 onclick="this.form.submit()" <?php echo ($lastDays == 365) ? "checked=true" : "" ?>> <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_year}'); ?>
+            <input id="4" type="radio" name="lastDays" value=365
+                   onclick="this.form.submit()" <?php echo ($lastDays == 365) ? "checked=true" : "" ?>>
+            <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_year}'); ?>
         </label>
     </form>
 </div>
