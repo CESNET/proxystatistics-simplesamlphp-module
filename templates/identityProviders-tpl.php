@@ -1,14 +1,19 @@
 <?php
-include dirname(__DIR__) . "/lib/Auth/Process/DatabaseCommand.php";
+
+use SimpleSAML\Module;
+use SimpleSAML\Module\proxystatistics\Auth\Process\DatabaseCommand;
+
 /**
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
  * @author Dominik Baránek <0Baranek.dominik0@gmail.com>
  */
+
 $lastDays = $this->data['lastDays'];
 
 ?>
+
 <link rel="stylesheet" media="screen" type="text/css"
-      href="<?php SimpleSAML_Module::getModuleUrl('proxystatistics/statisticsproxy.css') ?>"/>
+      href="<?php Module::getModuleUrl('proxystatistics/statisticsproxy.css') ?>"/>
 <script type="text/javascript">
     google.charts.load('current', {'packages': ['corechart', 'table']});
     google.charts.setOnLoadCallback(drawIdpsChart);

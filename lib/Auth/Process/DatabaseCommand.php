@@ -1,5 +1,8 @@
 <?php
-include("DatabaseConnector.php");
+
+namespace SimpleSAML\Module\proxystatistics\Auth\Process;
+
+use SimpleSAML\Logger;
 
 /**
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
@@ -24,7 +27,7 @@ class DatabaseCommand
         $day = $date->format('d');
 
         if (is_null($idpEntityID) || empty($idpEntityID) || is_null($spEntityId) || empty($spEntityId)) {
-            SimpleSAML\Logger::error(
+            Logger::error(
                 "Some from attribute: 'idpEntityId', 'idpName', 'spEntityId' and 'spName'" .
                 " is null or empty and login log wasn't inserted into the database."
             );
@@ -35,7 +38,7 @@ class DatabaseCommand
             );
             $stmt->bind_param("iiiss", $year, $month, $day, $idpEntityID, $spEntityId);
             if ($stmt->execute() === false) {
-                SimpleSAML\Logger::error("The login log wasn't inserted into table: " . $statisticsTableName . ".");
+                Logger::error("The login log wasn't inserted into table: " . $statisticsTableName . ".");
             }
 
             if (!is_null($idpName) && !empty($idpName)) {
@@ -57,7 +60,7 @@ class DatabaseCommand
             }
         }
 
-        SimpleSAML\Logger::info("The login log was successfully stored in database");
+        Logger::info("The login log was successfully stored in database");
 
         $conn->close();
     }

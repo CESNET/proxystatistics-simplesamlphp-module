@@ -1,5 +1,6 @@
 <?php
-include dirname(__DIR__) . "/lib/Auth/Process/DatabaseCommand.php";
+
+use SimpleSAML\Module\proxystatistics\Auth\Process\DatabaseCommand;
 
 /**
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
@@ -9,6 +10,7 @@ include dirname(__DIR__) . "/lib/Auth/Process/DatabaseCommand.php";
 $lastDays = $this->data['lastDays'];
 
 ?>
+
 <script type="text/javascript">
     google.charts.load('visualization', '1.0', {'packages': ['corechart', 'table']});
     google.charts.setOnLoadCallback(drawSpsChart);

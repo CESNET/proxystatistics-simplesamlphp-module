@@ -1,9 +1,15 @@
 <?php
+
+namespace SimpleSAML\Module\proxystatistics\Auth\Process;
+
+use SimpleSAML\Configuration;
+use SimpleSAML\Logger;
+
 /**
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
  */
 
-class databaseConnector
+class DatabaseConnector
 {
     private $serverName;
     private $port;
@@ -37,7 +43,7 @@ class databaseConnector
 
     public function __construct()
     {
-        $conf = SimpleSAML_Configuration::getConfig(self::CONFIG_FILE_NAME);
+        $conf = Configuration::getConfig(self::CONFIG_FILE_NAME);
         $this->serverName = $conf->getString(self::SERVER);
         $this->port = $conf->getInteger(self::PORT, null);
         $this->username = $conf->getString(self::USER);
@@ -57,7 +63,7 @@ class databaseConnector
     {
         $conn = mysqli_init();
         if ($this->encryption === true) {
-            SimpleSAML\Logger::debug("Getting connection with encryption.");
+            Logger::debug("Getting connection with encryption.");
             mysqli_ssl_set(
                 $conn,
                 $this->sslKey,
@@ -84,25 +90,23 @@ class databaseConnector
                     $this->port
                 );
             }
+        } elseif ($this->port === null) {
+            mysqli_real_connect(
+                $conn,
+                $this->serverName,
+                $this->username,
+                $this->password,
+                $this->databaseName
+            );
         } else {
-            if ($this->port === null) {
-                mysqli_real_connect(
-                    $conn,
-                    $this->serverName,
-                    $this->username,
-                    $this->password,
-                    $this->databaseName
-                );
-            } else {
-                mysqli_real_connect(
-                    $conn,
-                    $this->serverName,
-                    $this->username,
-                    $this->password,
-                    $this->databaseName,
-                    $this->port
-                );
-            }
+            mysqli_real_connect(
+                $conn,
+                $this->serverName,
+                $this->username,
+                $this->password,
+                $this->databaseName,
+                $this->port
+            );
         }
         mysqli_set_charset($conn, "utf8");
         return $conn;

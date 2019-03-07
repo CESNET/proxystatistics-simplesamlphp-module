@@ -1,5 +1,9 @@
 <?php
+
 include dirname(__DIR__) . "/lib/Auth/Process/DatabaseCommand.php";
+
+use SimpleSAML\Module\proxystatistics\Auth\Process\DatabaseCommand;
+use SimpleSAML\Module;
 
 /**
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
@@ -11,7 +15,7 @@ const INSTANCE_NAME = 'instance_name';
 
 $this->data['jquery'] = array('core' => true, 'ui' => true, 'css' => true);
 $this->data['head'] = '<link rel="stylesheet"  media="screen" type="text/css" href="' .
-    SimpleSAML\Module::getModuleUrl('proxystatistics/statisticsproxy.css') . '" />';
+    Module::getModuleUrl('proxystatistics/statisticsproxy.css') . '" />';
 $this->data['head'] .= '';
 $this->data['head'] .= '<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>';
 $this->data['head'] .= '<script type="text/javascript">
@@ -38,6 +42,7 @@ if (!is_null($spName) && !empty($spName)) {
 $this->includeAtTemplateBase('includes/header.php');
 
 ?>
+
     <script type="text/javascript">
         google.charts.load('current', {'packages': ['corechart', 'controls', 'table']});
         google.charts.setOnLoadCallback(drawLoginsChart);
@@ -170,6 +175,5 @@ $this->includeAtTemplateBase('includes/header.php');
     </div>
     </body>
 <?php
-
 
 $this->includeAtTemplateBase('includes/footer.php');

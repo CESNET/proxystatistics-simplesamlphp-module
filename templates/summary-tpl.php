@@ -1,5 +1,8 @@
 <?php
-include dirname(__DIR__) . "/lib/Auth/Process/DatabaseCommand.php";
+
+use SimpleSAML\Module\proxystatistics\Auth\Process\DatabaseCommand;
+use SimpleSAML\Module;
+
 /**
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
  * @author Dominik Baránek <0Baranek.dominik0@gmail.com>
@@ -10,7 +13,7 @@ $lastDays = $this->data['lastDays'];
 ?>
 
 <link rel="stylesheet" media="screen" type="text/css"
-      href="<?php SimpleSAML\Module::getModuleUrl('proxystatistics/statisticsproxy.css') ?>"/>
+      href="<?php Module::getModuleUrl('proxystatistics/statisticsproxy.css') ?>"/>
 
 <script type="text/javascript">
     google.charts.load('current', {'packages': ['corechart', 'controls', 'table']});
@@ -76,7 +79,6 @@ $lastDays = $this->data['lastDays'];
         }
     }
 
-
     google.charts.setOnLoadCallback(drawSpsChart);
 
     function drawSpsChart() {
@@ -109,9 +111,7 @@ $lastDays = $this->data['lastDays'];
                 window.location.href = 'spDetail.php?identifier=' + identifier;
             }
         }
-
     }
-
 
 </script>
 </head>

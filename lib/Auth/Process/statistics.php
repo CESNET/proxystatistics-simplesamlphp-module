@@ -1,11 +1,15 @@
 <?php
-include("DatabaseCommand.php");
+
+namespace SimpleSAML\Module\proxystatistics\Auth\Process;
+
+use SimpleSAML\Error\Exception;
+use SimpleSAML\Logger;
 
 /**
  *
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
  */
-class sspmod_proxystatistics_Auth_Process_statistics extends SimpleSAML_Auth_ProcessingFilter
+class Statistics extends \SimpleSAML\Auth\ProcessingFilter
 {
     private $config;
     private $reserved;
@@ -15,7 +19,7 @@ class sspmod_proxystatistics_Auth_Process_statistics extends SimpleSAML_Auth_Pro
         parent::__construct($config, $reserved);
 
         if (!isset($config['config'])) {
-            throw new SimpleSAML_Error_Exception("missing mandatory configuration option 'config'");
+            throw new Exception("missing mandatory configuration option 'config'");
         }
         $this->config = (array)$config['config'];
         $this->reserved = (array)$reserved;
@@ -23,7 +27,7 @@ class sspmod_proxystatistics_Auth_Process_statistics extends SimpleSAML_Auth_Pro
 
 	public function process(&$request)
 	{
-		$dateTime = new DateTime();
+		$dateTime = new \DateTime();
 		DatabaseCommand::insertLogin($request, $dateTime);
 
 		$eduPersonUniqueId = $request['Attributes']['eduPersonUniqueId'][0];

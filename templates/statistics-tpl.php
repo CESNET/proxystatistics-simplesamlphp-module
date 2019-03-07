@@ -1,25 +1,30 @@
 <?php
-include dirname(__DIR__) . "/lib/Auth/Process/DatabaseCommand.php";
+
+use SimpleSAML\Configuration;
+use SimpleSAML\Module;
+use SimpleSAML\Logger;
+
 /**
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
  * @author Dominik Baránek <0Baranek.dominik0@gmail.com>
  */
+
 const CONFIG_FILE_NAME = 'config.php';
 const INSTANCE_NAME = 'instance_name';
 
-$config = SimpleSAML_Configuration::getConfig(CONFIG_FILE_NAME);
+$config = Configuration::getConfig(CONFIG_FILE_NAME);
 $instanceName = $config->getString(INSTANCE_NAME, null);
 if (!is_null($instanceName)) {
     $this->data['header'] = $instanceName . ' ' .
         $this->t('{proxystatistics:Proxystatistics:templates/statistics_header}');
 } else {
     $this->data['header'] = $this->t('{proxystatistics:Proxystatistics:templates/statistics_header}');
-    SimpleSAML\Logger::warning('Missing configuration: config.php - instance_name is not set.');
+    Logger::warning('Missing configuration: config.php - instance_name is not set.');
 }
 
 $this->data['jquery'] = array('core' => true, 'ui' => true, 'css' => true);
 $this->data['head'] = '<link rel="stylesheet"  media="screen" type="text/css" href="' .
-    SimpleSAML\Module::getModuleUrl('proxystatistics/statisticsproxy.css') . '" />';
+    Module::getModuleUrl('proxystatistics/statisticsproxy.css') . '" />';
 $this->data['head'] .= '';
 $this->data['head'] .= '<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>';
 $this->data['head'] .= '<script type="text/javascript">
@@ -37,6 +42,7 @@ if (!isset($_POST['lastDays'])) {
 if (!isset($_POST['tab'])) {
     $_POST['tab'] = 1;
 }
+
 ?>
 
 <div id="tabdiv">
