@@ -37,8 +37,8 @@ class Statistics extends \SimpleSAML\Auth\ProcessingFilter
 
         if (isset($request['perun']['user'])) {
             $user = $request['perun']['user'];
-            Logger::notice('UserId: ' . $user->getId() . ', identity: ' .  $eduPersonUniqueId . ', service: ' . $spEntityId .
-                ', external identity: ' . $sourceIdPEppn . ' from ' . $sourceIdPEntityId);
+            Logger::notice('UserId: ' . $user->getId() . ', identity: ' .  $eduPersonUniqueId . ', service: '
+                . $spEntityId . ', external identity: ' . $sourceIdPEppn . ' from ' . $sourceIdPEntityId);
         } else {
             Logger::notice('User identity: ' .  $eduPersonUniqueId . ', service: ' . $spEntityId .
                 ', external identity: ' . $sourceIdPEppn . ' from ' . $sourceIdPEntityId);
