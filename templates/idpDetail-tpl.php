@@ -10,7 +10,7 @@ use SimpleSAML\Module;
 const CONFIG_FILE_NAME = 'config.php';
 const INSTANCE_NAME = 'instance_name';
 
-$this->data['jquery'] = array('core' => true, 'ui' => true, 'css' => true);
+$this->data['jquery'] = ['core' => true, 'ui' => true, 'css' => true];
 $this->data['head'] = '<link rel="stylesheet"  media="screen" type="text/css" href="' .
     Module::getModuleUrl('proxystatistics/statisticsproxy.css') . '" />';
 $this->data['head'] .= '';

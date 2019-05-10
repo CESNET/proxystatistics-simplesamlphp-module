@@ -22,7 +22,7 @@ if (!is_null($instanceName)) {
     Logger::warning('Missing configuration: config.php - instance_name is not set.');
 }
 
-$this->data['jquery'] = array('core' => true, 'ui' => true, 'css' => true);
+$this->data['jquery'] = ['core' => true, 'ui' => true, 'css' => true];
 $this->data['head'] = '<link rel="stylesheet"  media="screen" type="text/css" href="' .
     Module::getModuleUrl('proxystatistics/statisticsproxy.css') . '" />';
 $this->data['head'] .= '';
