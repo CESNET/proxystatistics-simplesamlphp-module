@@ -74,8 +74,9 @@ class DatabaseCommand
         $stmt = $conn->prepare(
             "SELECT name " .
             "FROM " . $tableName . " " .
-            "WHERE identifier='" . $identifier . "'"
+            "WHERE identifier=?"
         );
+        $stmt->bind_param('s', $identifier);
         $stmt->execute();
         $result = $stmt->get_result();
         $conn->close();
