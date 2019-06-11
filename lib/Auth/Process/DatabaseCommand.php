@@ -118,9 +118,10 @@ class DatabaseCommand
                 "FROM " . $table_name . " " .
                 "WHERE service != '' AND " .
                 "CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL " . $days . " DAY AND CURDATE()" .
+                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE()" .
                 "GROUP BY year DESC,month DESC,day DESC"
             );
+            $stmt->bind_param('d', $days);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -154,9 +155,10 @@ class DatabaseCommand
                 "FROM " . $table_name . " " .
                 "WHERE service='" . $spIdentifier . "' " .
                 "AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL " . $days . " DAY AND CURDATE() " .
+                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
                 "GROUP BY year DESC,month DESC,day DESC"
             );
+            $stmt->bind_param('d', $days);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -190,9 +192,10 @@ class DatabaseCommand
                 "FROM " . $table_name . " " .
                 "WHERE sourceIdP='" . $idpIdentifier . "' " .
                 "AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL " . $days . " DAY AND CURDATE() " .
+                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
                 "GROUP BY year DESC,month DESC,day DESC"
             );
+            $stmt->bind_param('d', $days);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -228,10 +231,11 @@ class DatabaseCommand
                 "FROM " . $table_name . " " .
                 "LEFT OUTER JOIN " . $serviceProvidersMapTableName . "  ON service = identifier " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL " . $days . " DAY AND CURDATE() " .
+                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
                 "GROUP BY service HAVING service != '' " .
                 "ORDER BY count DESC"
             );
+            $stmt->bind_param('d', $days);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -270,10 +274,11 @@ class DatabaseCommand
                 "FROM " . $table_name . " " .
                 "LEFT OUTER JOIN " . $identityProvidersMapTableName . "  ON sourceIdp = entityId " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL " . $days . " DAY AND CURDATE() " .
+                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
                 "GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service = '" . $spIdentifier . "' " .
                 "ORDER BY count DESC"
             );
+            $stmt->bind_param('d', $days);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -304,10 +309,11 @@ class DatabaseCommand
                 "FROM " . $table_name . " " .
                 "LEFT OUTER JOIN " . $serviceProvidersMapTableName . "  ON service = identifier " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL " . $days . " DAY AND CURDATE() " .
+                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
                 "GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp = '" . $idpEntityId . "' " .
                 "ORDER BY count DESC"
             );
+            $stmt->bind_param('d', $days);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -338,10 +344,11 @@ class DatabaseCommand
                 "FROM " . $tableName . " " .
                 "LEFT OUTER JOIN " . $identityProvidersMapTableName . " ON sourceIdp = entityId " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL " . $days . " DAY AND CURDATE() " .
+                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
                 "GROUP BY sourceIdp HAVING sourceIdp != '' " .
                 "ORDER BY count DESC"
             );
+            $stmt->bind_param('d', $days);
         }
         $stmt->execute();
         $result = $stmt->get_result();
