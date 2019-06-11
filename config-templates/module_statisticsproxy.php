@@ -56,28 +56,28 @@ $config = array(
 	/*
 	 * The path name to the certificate authority file.
 	 *
-	 * If you use encryption, you must fill this option.
+	 * Even if you do not use encryption, you must fill this option.
 	 */
 	'ssl_ca' => '/example/ca.pem',
 
 	/*
 	 * The path name to the certificate file.
 	 *
-	 * If you use encryption, you must fill this option.
+	 * Even if you do not use encryption, you must fill this option.
 	 */
 	'ssl_cert_path' => '/example/cert.pem',
 
 	/*
 	 * The path name to the key file.
 	 *
-	 * If you use encryption, you must fill this option.
+	 * Even if you do not use encryption, you must fill this option.
 	 */
 	'ssl_key_path' => '/example/key.pem',
 
 	/*
 	 * The pathname to a directory that contains trusted SSL CA certificates in PEM format.
 	 *
-	 * If you use encryption, you must fill this option.
+	 * Even if you do not use encryption, you must fill this option.
 	 */
 	'ssl_ca_path' => '/etc/ssl',
 
