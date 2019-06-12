@@ -3,6 +3,7 @@
 use SimpleSAML\Configuration;
 use SimpleSAML\Module;
 use SimpleSAML\Logger;
+use SimpleSAML\Module\proxystatistics\Auth\Process\DatabaseCommand;
 
 /**
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>

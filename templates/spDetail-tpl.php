@@ -1,7 +1,5 @@
 <?php
 
-include dirname(__DIR__) . "/lib/Auth/Process/DatabaseCommand.php";
-
 use SimpleSAML\Module\proxystatistics\Auth\Process\DatabaseCommand;
 use SimpleSAML\Module;
 
