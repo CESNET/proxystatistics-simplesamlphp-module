@@ -74,8 +74,9 @@ class DatabaseCommand
         $stmt = $conn->prepare(
             "SELECT name " .
             "FROM " . $tableName . " " .
-            "WHERE identifier='" . $identifier . "'"
+            "WHERE identifier=?"
         );
+        $stmt->bind_param('s', $identifier);
         $stmt->execute();
         $result = $stmt->get_result();
         $conn->close();
@@ -91,8 +92,9 @@ class DatabaseCommand
         $stmt = $conn->prepare(
             "SELECT name " .
             "FROM " . $tableName . " " .
-            "WHERE entityId='" . $idpEntityId . "'"
+            "WHERE entityId=?"
         );
+        $stmt->bind_param('s', $idpEntityId);
         $stmt->execute();
         $result = $stmt->get_result();
         $conn->close();
@@ -118,9 +120,10 @@ class DatabaseCommand
                 "FROM " . $table_name . " " .
                 "WHERE service != '' AND " .
                 "CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL " . $days . " DAY AND CURDATE()" .
+                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE()" .
                 "GROUP BY year DESC,month DESC,day DESC"
             );
+            $stmt->bind_param('d', $days);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -145,18 +148,20 @@ class DatabaseCommand
             $stmt = $conn->prepare(
                 "SELECT year, month, day, SUM(count) AS count " .
                     "FROM " . $table_name . " " .
-                    "WHERE service='" . $spIdentifier . "' " .
+                    "WHERE service=? " .
                     "GROUP BY year DESC,month DESC,day DESC"
             );
+            $stmt->bind_param('s', $spIdentifier);
         } else {
             $stmt = $conn->prepare(
                 "SELECT year, month, day, SUM(count) AS count " .
                 "FROM " . $table_name . " " .
-                "WHERE service='" . $spIdentifier . "' " .
+                "WHERE service=? " .
                 "AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL " . $days . " DAY AND CURDATE() " .
+                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
                 "GROUP BY year DESC,month DESC,day DESC"
             );
+            $stmt->bind_param('sd', $spIdentifier, $days);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -181,18 +186,20 @@ class DatabaseCommand
             $stmt = $conn->prepare(
                 "SELECT year, month, day, SUM(count) AS count " .
                 "FROM " . $table_name . " " .
-                "WHERE sourceIdP='" . $idpIdentifier . "' " .
+                "WHERE sourceIdP=? " .
                 "GROUP BY year DESC,month DESC,day DESC"
             );
+            $stmt->bind_param('s', $idpIdentifier);
         } else {
             $stmt = $conn->prepare(
                 "SELECT year, month, day, SUM(count) AS count " .
                 "FROM " . $table_name . " " .
-                "WHERE sourceIdP='" . $idpIdentifier . "' " .
+                "WHERE sourceIdP=? " .
                 "AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL " . $days . " DAY AND CURDATE() " .
+                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
                 "GROUP BY year DESC,month DESC,day DESC"
             );
+            $stmt->bind_param('sd', $idpIdentifier, $days);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -228,10 +235,11 @@ class DatabaseCommand
                 "FROM " . $table_name . " " .
                 "LEFT OUTER JOIN " . $serviceProvidersMapTableName . "  ON service = identifier " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL " . $days . " DAY AND CURDATE() " .
+                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
                 "GROUP BY service HAVING service != '' " .
                 "ORDER BY count DESC"
             );
+            $stmt->bind_param('d', $days);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -261,19 +269,21 @@ class DatabaseCommand
                 "SELECT sourceIdp, service, IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
                 "FROM " . $table_name . " " .
                 "LEFT OUTER JOIN " . $identityProvidersMapTableName . " ON sourceIdp = entityId " .
-                "GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service = '" . $spIdentifier . "' " .
+                "GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service=? " .
                 "ORDER BY count DESC"
             );
+            $stmt->bind_param('s', $spIdentifier);
         } else {
             $stmt = $conn->prepare(
                 "SELECT year, month, day, sourceIdp, service, IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
                 "FROM " . $table_name . " " .
                 "LEFT OUTER JOIN " . $identityProvidersMapTableName . "  ON sourceIdp = entityId " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL " . $days . " DAY AND CURDATE() " .
-                "GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service = '" . $spIdentifier . "' " .
+                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
+                "GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service=? " .
                 "ORDER BY count DESC"
             );
+            $stmt->bind_param('ds', $days, $spIdentifier);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -295,19 +305,21 @@ class DatabaseCommand
                 "SELECT sourceIdp, service, IFNULL(name,service) AS spName, SUM(count) AS count " .
                 "FROM " . $table_name . " " .
                 "LEFT OUTER JOIN " . $serviceProvidersMapTableName . " ON service = identifier " .
-                "GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp = '" . $idpEntityId . "' " .
+                "GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp=? " .
                 "ORDER BY count DESC"
             );
+            $stmt->bind_param('s', $idpEntityId);
         } else {
             $stmt = $conn->prepare(
                 "SELECT year, month, day, sourceIdp, service, IFNULL(name,service) AS spName, SUM(count) AS count " .
                 "FROM " . $table_name . " " .
                 "LEFT OUTER JOIN " . $serviceProvidersMapTableName . "  ON service = identifier " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL " . $days . " DAY AND CURDATE() " .
-                "GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp = '" . $idpEntityId . "' " .
+                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
+                "GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp=? " .
                 "ORDER BY count DESC"
             );
+            $stmt->bind_param('ds', $days, $idpEntityId);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -338,10 +350,11 @@ class DatabaseCommand
                 "FROM " . $tableName . " " .
                 "LEFT OUTER JOIN " . $identityProvidersMapTableName . " ON sourceIdp = entityId " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL " . $days . " DAY AND CURDATE() " .
+                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
                 "GROUP BY sourceIdp HAVING sourceIdp != '' " .
                 "ORDER BY count DESC"
             );
+            $stmt->bind_param('d', $days);
         }
         $stmt->execute();
         $result = $stmt->get_result();
