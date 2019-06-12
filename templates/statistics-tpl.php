@@ -26,7 +26,6 @@ if (!is_null($instanceName)) {
 $this->data['jquery'] = array('core' => true, 'ui' => true, 'css' => true);
 $this->data['head'] = '<link rel="stylesheet"  media="screen" type="text/css" href="' .
     Module::getModuleUrl('proxystatistics/statisticsproxy.css') . '" />';
-$this->data['head'] .= '';
 $this->data['head'] .= '<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>';
 $this->data['head'] .= '<script type="text/javascript">
 $(document).ready(function() {
