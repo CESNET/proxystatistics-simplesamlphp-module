@@ -27,13 +27,6 @@ $this->data['jquery'] = array('core' => true, 'ui' => true, 'css' => true);
 $this->data['head'] = '<link rel="stylesheet"  media="screen" type="text/css" href="' .
     Module::getModuleUrl('proxystatistics/statisticsproxy.css') . '" />';
 $this->data['head'] .= '<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>';
-$this->data['head'] .= '<script type="text/javascript">
-$(document).ready(function() {
-	$("#tabdiv").tabs();
-});
-</script>';
-
-$this->includeAtTemplateBase('includes/header.php');
 
 if (!isset($this->data['lastDays'])) {
     $this->data['lastDays'] = 0;
@@ -42,10 +35,25 @@ if (!isset($this->data['lastDays'])) {
 if (!isset($this->data['tab'])) {
     $this->data['tab'] = 1;
 }
-
+$this->data['head'] .= '<meta name="loginCountPerDay" id="loginCountPerDay" content="' .
+    htmlspecialchars(json_encode(DatabaseCommand::getLoginCountPerDay($this->data['lastDays']), JSON_NUMERIC_CHECK))
+    . '">';
+$this->data['head'] .= '<meta name="loginCountPerIdp" id="loginCountPerIdp" content="' .
+    htmlspecialchars(json_encode(DatabaseCommand::getLoginCountPerIdp($this->data['lastDays']), JSON_NUMERIC_CHECK))
+    . '">';
+$this->data['head'] .= '<meta name="accessCountPerService" id="accessCountPerService" content="' .
+    htmlspecialchars(json_encode(
+        DatabaseCommand::getAccessCountPerService($this->data['lastDays']),
+    JSON_NUMERIC_CHECK)) . '">';
+$this->data['head'] .= '<meta name="translations" id="translations" content="'.htmlspecialchars(json_encode([
+    'tables_identity_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_identity_provider}'),
+    'tables_service_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_service_provider}'),
+    'count' => $this->t('{proxystatistics:Proxystatistics:templates/count}'),
+])).'">';
+$this->includeAtTemplateBase('includes/header.php');
 ?>
 
-<div id="tabdiv">
+<div id="tabdiv" data-activetab="<?php echo htmlspecialchars($this->data['tab']);?>">
     <ul class="tabset_tabs" width="100px">
         <li><a id="tab-1"
                href='<?php echo "summary.php?lastDays=" . $this->data['lastDays']; ?>'>
@@ -62,12 +70,8 @@ if (!isset($this->data['tab'])) {
     </ul>
 </div>
 
-<script>
-    window.onload = function () {
-        <?php echo "$('#tab-" . $_POST['tab'] . "').click();"; ?>
-    }
-</script>
-
 <?php
+$this->data['htmlinject']['htmlContentPost'][]
+    = '<script type="text/javascript" src="' . Module::getMOduleUrl('proxystatistics/index.js') . '"></script>';
 $this->includeAtTemplateBase('includes/footer.php');
 ?>

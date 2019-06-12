@@ -10,19 +10,28 @@ use SimpleSAML\Module;
 const CONFIG_FILE_NAME = 'config.php';
 const INSTANCE_NAME = 'instance_name';
 
+$lastDays = $this->data['lastDays'];
+$idpEntityId = $this->data['entityId'];
+
 $this->data['jquery'] = array('core' => true, 'ui' => true, 'css' => true);
 $this->data['head'] = '<link rel="stylesheet"  media="screen" type="text/css" href="' .
     Module::getModuleUrl('proxystatistics/statisticsproxy.css') . '" />';
 $this->data['head'] .= '<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>';
-$this->data['head'] .= '<script type="text/javascript">
-$(document).ready(function() {
-	$("#tabdiv").tabs();
-});
-</script>';
-
-$lastDays = $this->data['lastDays'];
-
-$idpEntityId = $this->data['entityId'];
+$this->data['head'] .= '<meta name="loginCountPerDay" id="loginCountPerDay" content="' .
+    htmlspecialchars(json_encode(
+        DatabaseCommand::getLoginCountPerDayForIdp($lastDays, $idpEntityId),
+    JSON_NUMERIC_CHECK)) . '">';
+$this->data['head'] .=
+    '<meta name="accessCountForIdentityProviderPerServiceProviders" ' .
+    'id="accessCountForIdentityProviderPerServiceProviders" content="' .
+    htmlspecialchars(json_encode(
+        DatabaseCommand::getAccessCountForIdentityProviderPerServiceProviders($lastDays, $idpEntityId),
+    JSON_NUMERIC_CHECK)).'">';
+$this->data['head'] .= '<meta name="translations" id="translations" content="'.htmlspecialchars(json_encode([
+    'tables_identity_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_identity_provider}'),
+    'tables_service_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_service_provider}'),
+    'count' => $this->t('{proxystatistics:Proxystatistics:templates/count}'),
+])).'">';
 
 $idpName = DatabaseCommand::getIdPNameByEntityId($idpEntityId);
 
@@ -36,80 +45,6 @@ if (!is_null($idpName) && !empty($idpName)) {
 $this->includeAtTemplateBase('includes/header.php');
 
 ?>
-
-    <script type="text/javascript">
-        google.charts.load('current', {'packages': ['corechart', 'controls', 'table']});
-        google.charts.setOnLoadCallback(drawLoginsChart);
-        google.charts.setOnLoadCallback(drawAccessedSpsChart);
-        google.charts.setOnLoadCallback(drawAccessedSpsTable);
-
-        function drawLoginsChart() {
-            var data = google.visualization.arrayToDataTable([
-                ['Date', 'Count'],
-                <?php DatabaseCommand::getLoginCountPerDayForIdp($lastDays, $idpEntityId)?>
-            ]);
-
-            var dashboard = new google.visualization.Dashboard(document.getElementById('loginsDashboard'));
-
-            var chartRangeFilter = new google.visualization.ControlWrapper({
-                'controlType': 'ChartRangeFilter',
-                'containerId': 'control_div',
-                'options': {
-                    'filterColumnLabel': 'Date'
-                }
-            });
-            var chart = new google.visualization.ChartWrapper({
-                'chartType': 'LineChart',
-                'containerId': 'line_div',
-                'options': {
-                    'legend': 'none'
-                }
-            });
-            dashboard.bind(chartRangeFilter, chart);
-            dashboard.draw(data);
-        }
-
-        function drawAccessedSpsChart() {
-            var data = google.visualization.arrayToDataTable([
-                ['service', 'Count'],
-                <?php DatabaseCommand::getAccessCountForIdentityProviderPerServiceProviders($lastDays, $idpEntityId)?>
-            ]);
-
-            var options = {
-                pieSliceText: 'value',
-                chartArea: {left: 20, top: 0, width: '100%', height: '100%'}
-            };
-
-            var chart = new google.visualization.PieChart(document.getElementById('accessedSpsChartDetail'));
-
-            data.sort([{column: 1, desc: true}]);
-            chart.draw(data, options);
-        }
-
-        function drawAccessedSpsTable() {
-            var data = new google.visualization.DataTable();
-
-            data.addColumn(
-                'string',
-                '<?php echo $this->t('{proxystatistics:Proxystatistics:templates/tables_service_provider}'); ?>'
-            );
-            data.addColumn(
-                'number',
-                '<?php echo $this->t('{proxystatistics:Proxystatistics:templates/count}'); ?>'
-            );
-            data.addRows(
-                [<?php DatabaseCommand::getAccessCountForIdentityProviderPerServiceProviders($lastDays, $idpEntityId)?>]
-            );
-
-            var table = new google.visualization.Table(document.getElementById('accessedSpsTable'));
-
-            var options = {
-                allowHtml: true
-            };
-
-            table.draw(data, options);
-        }
-    </script>
     </head>
     <body>
     <div class="go-to-stats-btn">
@@ -170,5 +105,6 @@ $this->includeAtTemplateBase('includes/header.php');
     </div>
     </body>
 <?php
-
+$this->data['htmlinject']['htmlContentPost'][]
+    = '<script type="text/javascript" src="' . Module::getMOduleUrl('proxystatistics/index.js') . '"></script>';
 $this->includeAtTemplateBase('includes/footer.php');

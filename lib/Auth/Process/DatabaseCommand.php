@@ -127,15 +127,9 @@ class DatabaseCommand
         }
         $stmt->execute();
         $result = $stmt->get_result();
-        while ($row = $result->fetch_assoc()) {
-            echo "[new Date(" .
-                $row["year"] . "," .
-                ($row["month"] - 1) .", " .
-                $row["day"] . "), {v:" .
-                $row["count"] .
-                "}],";
-        }
+        $r = $result->fetch_all(MYSQLI_ASSOC);
         $conn->close();
+        return $r;
     }
 
     public static function getLoginCountPerDayForService($days, $spIdentifier)
@@ -165,15 +159,9 @@ class DatabaseCommand
         }
         $stmt->execute();
         $result = $stmt->get_result();
-        while ($row = $result->fetch_assoc()) {
-            echo "[new Date(" .
-                $row["year"] . "," .
-                ($row["month"] - 1) . ", " .
-                $row["day"] . "), {v:" .
-                $row["count"] .
-                "}],";
-        }
+        $r = $result->fetch_all(MYSQLI_ASSOC);
         $conn->close();
+        return $r;
     }
 
     public static function getLoginCountPerDayForIdp($days, $idpIdentifier)
@@ -203,15 +191,9 @@ class DatabaseCommand
         }
         $stmt->execute();
         $result = $stmt->get_result();
-        while ($row = $result->fetch_assoc()) {
-            echo "[new Date(" .
-                $row["year"] . "," .
-                ($row["month"] - 1) . ", " .
-                $row["day"] . "), {v:" .
-                $row["count"] .
-                "}],";
-        }
+        $r = $result->fetch_all(MYSQLI_ASSOC);
         $conn->close();
+        return $r;
     }
 
     public static function getAccessCountPerService($days)
@@ -223,7 +205,7 @@ class DatabaseCommand
         $serviceProvidersMapTableName = $databaseConnector->getServiceProvidersMapTableName();
         if ($days == 0) {    // 0 = all time
             $stmt = $conn->prepare(
-                "SELECT service, IFNULL(name,service) AS spName, SUM(count) AS count " .
+                "SELECT IFNULL(name,service) AS spName, service, SUM(count) AS count " .
                 "FROM " . $table_name . " " .
                 "LEFT OUTER JOIN " . $serviceProvidersMapTableName . " ON service = identifier " .
                 "GROUP BY service HAVING service != '' " .
@@ -231,7 +213,7 @@ class DatabaseCommand
             );
         } else {
             $stmt = $conn->prepare(
-                "SELECT year, month, day, service, IFNULL(name,service) AS spName, SUM(count) AS count " .
+                "SELECT IFNULL(name,service) AS spName, service, SUM(count) AS count " .
                 "FROM " . $table_name . " " .
                 "LEFT OUTER JOIN " . $serviceProvidersMapTableName . "  ON service = identifier " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
@@ -243,12 +225,9 @@ class DatabaseCommand
         }
         $stmt->execute();
         $result = $stmt->get_result();
-        while ($row = $result->fetch_assoc()) {
-            echo "['" .
-                str_replace("'", "\'", $row["spName"]) .
-                "', '" . $row ["service"] . "', " . $row["count"] . "],";
-        }
+        $r = $result->fetch_all(MYSQLI_NUM);
         $conn->close();
+        return $r;
     }
 
     public static function getAccessCountForServicePerIdentityProviders($days, $spIdentifier)
@@ -260,7 +239,7 @@ class DatabaseCommand
         $identityProvidersMapTableName = $databaseConnector->getIdentityProvidersMapTableName();
         if ($days == 0) {    // 0 = all time
             $stmt = $conn->prepare(
-                "SELECT sourceIdp, service, IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
+                "SELECT IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
                 "FROM " . $table_name . " " .
                 "LEFT OUTER JOIN " . $identityProvidersMapTableName . " ON sourceIdp = entityId " .
                 "GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service=? " .
@@ -269,7 +248,7 @@ class DatabaseCommand
             $stmt->bind_param('s', $spIdentifier);
         } else {
             $stmt = $conn->prepare(
-                "SELECT year, month, day, sourceIdp, service, IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
+                "SELECT IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
                 "FROM " . $table_name . " " .
                 "LEFT OUTER JOIN " . $identityProvidersMapTableName . "  ON sourceIdp = entityId " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
@@ -281,10 +260,9 @@ class DatabaseCommand
         }
         $stmt->execute();
         $result = $stmt->get_result();
-        while ($row = $result->fetch_assoc()) {
-            echo "['" . str_replace("'", "\'", $row["idpName"]) . "', " . $row["count"] . "],";
-        }
+        $r = $result->fetch_all(MYSQLI_NUM);
         $conn->close();
+        return $r;
     }
 
     public static function getAccessCountForIdentityProviderPerServiceProviders($days, $idpEntityId)
@@ -296,7 +274,7 @@ class DatabaseCommand
         $serviceProvidersMapTableName = $databaseConnector->getServiceProvidersMapTableName();
         if ($days == 0) {    // 0 = all time
             $stmt = $conn->prepare(
-                "SELECT sourceIdp, service, IFNULL(name,service) AS spName, SUM(count) AS count " .
+                "SELECT IFNULL(name,service) AS spName, SUM(count) AS count " .
                 "FROM " . $table_name . " " .
                 "LEFT OUTER JOIN " . $serviceProvidersMapTableName . " ON service = identifier " .
                 "GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp=? " .
@@ -305,7 +283,7 @@ class DatabaseCommand
             $stmt->bind_param('s', $idpEntityId);
         } else {
             $stmt = $conn->prepare(
-                "SELECT year, month, day, sourceIdp, service, IFNULL(name,service) AS spName, SUM(count) AS count " .
+                "SELECT IFNULL(name,service) AS spName, SUM(count) AS count " .
                 "FROM " . $table_name . " " .
                 "LEFT OUTER JOIN " . $serviceProvidersMapTableName . "  ON service = identifier " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
@@ -317,10 +295,9 @@ class DatabaseCommand
         }
         $stmt->execute();
         $result = $stmt->get_result();
-        while ($row = $result->fetch_assoc()) {
-            echo "['" . str_replace("'", "\'", $row["spName"]) . "', " . $row["count"] . "],";
-        }
+        $r = $result->fetch_all(MYSQLI_NUM);
         $conn->close();
+        return $r;
     }
 
     public static function getLoginCountPerIdp($days)
@@ -332,7 +309,7 @@ class DatabaseCommand
         $identityProvidersMapTableName = $databaseConnector->getIdentityProvidersMapTableName();
         if ($days == 0) {    // 0 = all time
             $stmt = $conn->prepare(
-                "SELECT sourceIdp, IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
+                "SELECT IFNULL(name,sourceIdp) AS idpName, sourceIdp, SUM(count) AS count " .
                 "FROM " . $tableName . " " .
                 "LEFT OUTER JOIN " . $identityProvidersMapTableName . " ON sourceIdp = entityId " .
                 "GROUP BY sourceIdp HAVING sourceIdp != '' " .
@@ -340,7 +317,7 @@ class DatabaseCommand
             );
         } else {
             $stmt = $conn->prepare(
-                "SELECT year, month, day, sourceIdp, IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
+                "SELECT IFNULL(name,sourceIdp) AS idpName, sourceIdp, SUM(count) AS count " .
                 "FROM " . $tableName . " " .
                 "LEFT OUTER JOIN " . $identityProvidersMapTableName . " ON sourceIdp = entityId " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
@@ -352,11 +329,8 @@ class DatabaseCommand
         }
         $stmt->execute();
         $result = $stmt->get_result();
-        while ($row = $result->fetch_assoc()) {
-            echo "['" .
-                str_replace("'", "\'", $row["idpName"]) .
-                "', '" . $row['sourceIdp'] . "', " . $row["count"] . "],";
-        }
+        $r = $result->fetch_all(MYSQLI_NUM);
         $conn->close();
+        return $r;
     }
 }

@@ -10,21 +10,27 @@ use SimpleSAML\Module;
 const CONFIG_FILE_NAME = 'config.php';
 const INSTANCE_NAME = 'instance_name';
 
+$lastDays = $this->data['lastDays'];
+$spIdentifier = $this->data['identifier'];
 
 $this->data['jquery'] = array('core' => true, 'ui' => true, 'css' => true);
 $this->data['head'] = '<link rel="stylesheet"  media="screen" type="text/css" href="' .
     Module::getModuleUrl('proxystatistics/statisticsproxy.css') . '" />';
 $this->data['head'] .= '<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>';
-$this->data['head'] .= '<script type="text/javascript">
-$(document).ready(function() {
-	$("#tabdiv").tabs();
-});
-</script>';
-
-$lastDays = $this->data['lastDays'];
-
-$spIdentifier = $this->data['identifier'];
-
+$this->data['head'] .= '<meta name="loginCountPerDay" id="loginCountPerDay" content="' .
+    htmlspecialchars(json_encode(
+        DatabaseCommand::getLoginCountPerDayForService($lastDays, $spIdentifier),
+    JSON_NUMERIC_CHECK)) . '">';
+$this->data['head'] .=
+    '<meta name="accessCountForServicePerIdentityProviders" id="accessCountForServicePerIdentityProviders" content="' .
+    htmlspecialchars(json_encode(
+        DatabaseCommand::getAccessCountForServicePerIdentityProviders($lastDays, $spIdentifier),
+    JSON_NUMERIC_CHECK)) . '">';
+$this->data['head'] .= '<meta name="translations" id="translations" content="'.htmlspecialchars(json_encode([
+    'tables_identity_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_identity_provider}'),
+    'tables_service_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_service_provider}'),
+    'count' => $this->t('{proxystatistics:Proxystatistics:templates/count}'),
+])).'">';
 
 $spName = DatabaseCommand::getSpNameBySpIdentifier($spIdentifier);
 
@@ -40,79 +46,6 @@ $this->includeAtTemplateBase('includes/header.php');
 
 ?>
 
-    <script type="text/javascript">
-        google.charts.load('current', {'packages': ['corechart', 'controls', 'table']});
-        google.charts.setOnLoadCallback(drawLoginsChart);
-        google.charts.setOnLoadCallback(drawUsedIdpsChart);
-        google.charts.setOnLoadCallback(drawUsedIdpsTable);
-
-        function drawLoginsChart() {
-            var data = google.visualization.arrayToDataTable([
-                ['Date', 'Count'],
-                <?php DatabaseCommand::getLoginCountPerDayForService($lastDays, $spIdentifier)?>
-            ]);
-
-            var dashboard = new google.visualization.Dashboard(document.getElementById('loginsDashboard'));
-
-            var chartRangeFilter = new google.visualization.ControlWrapper({
-                'controlType': 'ChartRangeFilter',
-                'containerId': 'control_div',
-                'options': {
-                    'filterColumnLabel': 'Date'
-                }
-            });
-            var chart = new google.visualization.ChartWrapper({
-                'chartType': 'LineChart',
-                'containerId': 'line_div',
-                'options': {
-                    'legend': 'none'
-                }
-            });
-            dashboard.bind(chartRangeFilter, chart);
-            dashboard.draw(data);
-        }
-
-        function drawUsedIdpsChart() {
-            var data = google.visualization.arrayToDataTable([
-                ['service', 'Count'],
-                <?php DatabaseCommand::getAccessCountForServicePerIdentityProviders($lastDays, $spIdentifier)?>
-            ]);
-
-            var options = {
-                pieSliceText: 'value',
-                chartArea: {left: 20, top: 0, width: '100%', height: '100%'}
-            };
-
-            var chart = new google.visualization.PieChart(document.getElementById('usedIdPsChartDetail'));
-
-            data.sort([{column: 1, desc: true}]);
-            chart.draw(data, options);
-        }
-
-        function drawUsedIdpsTable() {
-            var data = new google.visualization.DataTable();
-
-            data.addColumn(
-                'string',
-                '<?php echo $this->t('{proxystatistics:Proxystatistics:templates/tables_service_provider}'); ?>'
-            );
-            data.addColumn(
-                'number',
-                '<?php echo $this->t('{proxystatistics:Proxystatistics:templates/count}'); ?>'
-            );
-            data.addRows(
-                [<?php DatabaseCommand::getAccessCountForServicePerIdentityProviders($lastDays, $spIdentifier)?>]
-            );
-
-            var table = new google.visualization.Table(document.getElementById('usedIdPsTable'));
-
-            var options = {
-                allowHtml: true
-            };
-
-            table.draw(data, options);
-        }
-    </script>
     </head>
     <body>
     <div class="go-to-stats-btn">
@@ -126,22 +59,22 @@ $this->includeAtTemplateBase('includes/header.php');
         <form id="dateSelector" method="post">
             <label>
                 <input id="1" type="radio" name="lastDays" value=0
-                       onclick="this.form.submit()" <?php echo ($lastDays == 0) ? "checked=true" : "" ?>>
+                        <?php echo ($lastDays == 0) ? "checked=true" : "" ?>>
                 <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_all}'); ?>
             </label>
             <label>
                 <input id="2" type="radio" name="lastDays" value=7
-                       onclick="this.form.submit()" <?php echo ($lastDays == 7) ? "checked=true" : "" ?>>
+                        <?php echo ($lastDays == 7) ? "checked=true" : "" ?>>
                 <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_week}'); ?>
             </label>
             <label>
                 <input id="3" type="radio" name="lastDays" value=30
-                       onclick="this.form.submit()" <?php echo ($lastDays == 30) ? "checked=true" : "" ?>>
+                        <?php echo ($lastDays == 30) ? "checked=true" : "" ?>>
                 <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_month}'); ?>
             </label>
             <label>
                 <input id="4" type="radio" name="lastDays" value=365
-                       onclick="this.form.submit()" <?php echo ($lastDays == 365) ? "checked=true" : "" ?>>
+                        <?php echo ($lastDays == 365) ? "checked=true" : "" ?>>
                 <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_year}'); ?>
             </label>
         </form>
@@ -172,5 +105,6 @@ $this->includeAtTemplateBase('includes/header.php');
     </div>
     </body>
 <?php
-
+$this->data['htmlinject']['htmlContentPost'][]
+    = '<script type="text/javascript" src="' . Module::getMOduleUrl('proxystatistics/index.js') . '"></script>';
 $this->includeAtTemplateBase('includes/footer.php');
