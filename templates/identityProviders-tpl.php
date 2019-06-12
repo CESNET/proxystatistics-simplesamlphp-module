@@ -86,9 +86,6 @@ $lastDays = $this->data['lastDays'];
     }
 
 </script>
-</head>
-
-<body>
 <div class="timeRange">
     <h4><?php echo $this->t('{proxystatistics:Proxystatistics:templates_time_range}'); ?></h4>
     <form id="dateSelector" method="post">
@@ -128,4 +125,3 @@ $lastDays = $this->data['lastDays'];
         <div id="idpsTable" class="table"></div>
     </div>
 </div>
-</body>
