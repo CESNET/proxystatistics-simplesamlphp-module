@@ -13,9 +13,7 @@ $session = Session::getSessionFromRequest();
 
 $t = new Template($config, 'proxystatistics:idpDetail-tpl.php');
 
-if (!isset($_POST['lastDays'])) {
-    $_POST['lastDays'] = 0;
-}
-$t->data['lastDays'] = $_POST['lastDays'];
-$t->data['entityId'] = $_GET['entityId'];
+$t->data['lastDays'] = filter_input(INPUT_POST, 'lastDays', FILTER_VALIDATE_INT,
+    ['options'=>['default'=>0,'min_range'=>0]]);
+$t->data['entityId'] = filter_input(INPUT_GET, 'entityId', FILTER_SANITIZE_STRING);
 $t->show();

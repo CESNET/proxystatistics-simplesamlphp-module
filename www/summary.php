@@ -12,5 +12,6 @@ $config = Configuration::getInstance();
 $session = Session::getSessionFromRequest();
 
 $t = new Template($config, 'proxystatistics:summary-tpl.php');
-$t->data['lastDays'] = $_GET['lastDays'];
+$t->data['lastDays'] = filter_input(INPUT_GET, 'lastDays', FILTER_VALIDATE_INT,
+    ['options'=>['default'=>0,'min_range'=>0]]);
 $t->show();
