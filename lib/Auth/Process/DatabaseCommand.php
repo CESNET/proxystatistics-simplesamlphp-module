@@ -244,12 +244,6 @@ class DatabaseCommand
         $stmt->execute();
         $result = $stmt->get_result();
         while ($row = $result->fetch_assoc()) {
-            //echo "['<a href=spDetail.php?identifier=" .
-            //$row["service"] . "> " .
-            //str_replace("'", "\'", $row["spName"]) .
-            //"</a>', " .
-            //$row["count"] .
-            //"],";
             echo "['" .
                 str_replace("'", "\'", $row["spName"]) .
                 "', '" . $row ["service"] . "', " . $row["count"] . "],";
