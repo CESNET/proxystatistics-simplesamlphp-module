@@ -72,42 +72,15 @@ class DatabaseConnector
                 $this->sslCAPath,
                 null
             );
-            if ($this->port === null) {
-                mysqli_real_connect(
-                    $conn,
-                    $this->serverName,
-                    $this->username,
-                    $this->password,
-                    $this->databaseName
-                );
-            } else {
-                mysqli_real_connect(
-                    $conn,
-                    $this->serverName,
-                    $this->username,
-                    $this->password,
-                    $this->databaseName,
-                    $this->port
-                );
-            }
-        } elseif ($this->port === null) {
-            mysqli_real_connect(
-                $conn,
-                $this->serverName,
-                $this->username,
-                $this->password,
-                $this->databaseName
-            );
-        } else {
-            mysqli_real_connect(
-                $conn,
-                $this->serverName,
-                $this->username,
-                $this->password,
-                $this->databaseName,
-                $this->port
-            );
         }
+        mysqli_real_connect(
+            $conn,
+            $this->serverName,
+            $this->username,
+            $this->password,
+            $this->databaseName,
+            $this->port
+        );
         mysqli_set_charset($conn, "utf8");
         return $conn;
     }
