@@ -1,4 +1,7 @@
+/* global google */
+/* eslint-disable */
 if(!Function.prototype.bind){(function(){var slice=Array.prototype.slice.call.bind(Array.prototype.slice);Function.prototype.bind=function(){var thatFunc=this,thatArg=arguments[0];var args=slice(arguments,1);if(typeof thatFunc!=='function'){throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable')}return function(){var funcArgs=args.concat(slice(arguments));return thatFunc.apply(thatArg,funcArgs)}}})()}
+/* eslint-enable */
 
 function getStatisticsData(name) {
     return $.parseJSON($('#'+name).attr('content'));
