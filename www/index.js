@@ -50,17 +50,17 @@ function drawLoginsChart(getEl) {
   dashboard.draw(data);
 }
 
-function drawIdpsChart(getEl) {
+function drawPieChart(colNames, dataName, sortCol, viewCols, url, getEl) {
   var el = getEl();
   if (!el) return;
 
-  var data = google.visualization.arrayToDataTable([['sourceIdpName', 'sourceIdPEntityId', 'Count']].concat(getStatisticsData('loginCountPerIdp')));
+  var data = google.visualization.arrayToDataTable([colNames].concat(getStatisticsData(dataName)));
+  data.sort([{ column: sortCol, desc: true }]);
 
-  data.sort([{ column: 2, desc: true }]);
-
-  var view = new google.visualization.DataView(data);
-
-  view.setColumns([0, 2]);
+  if (viewCols) {
+    var view = new google.visualization.DataView(data);
+    view.setColumns(viewCols);
+  }
 
   var options = {
     pieSliceText: 'value',
@@ -71,38 +71,17 @@ function drawIdpsChart(getEl) {
 
   var chart = new google.visualization.PieChart(el);
 
-  chart.draw(view, options);
+  chart.draw(view ? view : data, options);
 
-  var sh = selectHandler.bind(null, chart, data, 'idpDetail.php?entityId=');
-  google.visualization.events.addListener(chart, 'select', sh);
+  if (url) {
+    var sh = selectHandler.bind(null, chart, data, url);
+    google.visualization.events.addListener(chart, 'select', sh);
+  }
 }
 
-function drawSpsChart(getEl) {
-  var el = getEl();
-  if (!el) return;
+drawIdpsChart = drawPieChart.bind(null, ['sourceIdpName', 'sourceIdPEntityId', 'Count'], 'loginCountPerIdp', 2, [0, 2], 'idpDetail.php?entityId=');
 
-  var data = google.visualization.arrayToDataTable([['service', 'serviceIdentifier', 'Count']].concat(getStatisticsData('accessCountPerService')));
-
-  data.sort([{ column: 2, desc: true }]);
-
-  var view = new google.visualization.DataView(data);
-
-  view.setColumns([0, 2]);
-
-  var options = {
-    pieSliceText: 'value',
-    chartArea: {
-      left: 20, top: 0, width: '100%', height: '100%'
-    }
-  };
-
-  var chart = new google.visualization.PieChart(el);
-
-  chart.draw(view, options);
-
-  var sh = selectHandler.bind(null, chart, data, 'spDetail.php?identifier=');
-  google.visualization.events.addListener(chart, 'select', sh);
-}
+drawSpsChart = drawPieChart.bind(null, ['service', 'serviceIdentifier', 'Count'], 'accessCountPerService', 2, [0, 2], 'spDetail.php?identifier=');
 
 function drawIdpsTable(getEl) {
   var el = getEl();
@@ -135,24 +114,7 @@ function drawIdpsTable(getEl) {
   google.visualization.events.addListener(table, 'select', sh);
 }
 
-function drawAccessedSpsChart(getEl) {
-  var el = getEl();
-  if (!el) return;
-
-  var data = google.visualization.arrayToDataTable([['service', 'Count']].concat(getStatisticsData('accessCountForIdentityProviderPerServiceProviders')));
-
-  var options = {
-    pieSliceText: 'value',
-    chartArea: {
-      left: 20, top: 0, width: '100%', height: '100%'
-    }
-  };
-
-  var chart = new google.visualization.PieChart(el);
-
-  data.sort([{ column: 1, desc: true }]);
-  chart.draw(data, options);
-}
+drawAccessedSpsChart = drawPieChart.bind(null, ['service', 'Count'], 'accessCountForIdentityProviderPerServiceProviders', 1, null, null);
 
 function drawAccessedSpsTable(getEl) {
   var el = getEl();
@@ -221,24 +183,7 @@ function drawSpsTable(getEl) {
   google.visualization.events.addListener(table, 'select', sh);
 }
 
-function drawUsedIdpsChart(getEl) {
-  var el = getEl();
-  if (!el) return;
-
-  var data = google.visualization.arrayToDataTable([['service', 'Count']].concat(getStatisticsData('accessCountForServicePerIdentityProviders')));
-
-  var options = {
-    pieSliceText: 'value',
-    chartArea: {
-      left: 20, top: 0, width: '100%', height: '100%'
-    }
-  };
-
-  var chart = new google.visualization.PieChart(el);
-
-  data.sort([{ column: 1, desc: true }]);
-  chart.draw(data, options);
-}
+drawUsedIdpsChart = drawPieChart.bind(null, ['service', 'Count'], 'accessCountForServicePerIdentityProviders', 1, null, null);
 
 function drawUsedIdpsTable(getEl) {
   var el = getEl();
