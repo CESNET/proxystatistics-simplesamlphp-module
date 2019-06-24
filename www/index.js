@@ -57,8 +57,9 @@ function drawPieChart(colNames, dataName, sortCol, viewCols, url, getEl) {
   var data = google.visualization.arrayToDataTable([colNames].concat(getStatisticsData(dataName)));
   data.sort([{ column: sortCol, desc: true }]);
 
+  var view = null;
   if (viewCols) {
-    var view = new google.visualization.DataView(data);
+    view = new google.visualization.DataView(data);
     view.setColumns(viewCols);
   }
 
@@ -71,7 +72,7 @@ function drawPieChart(colNames, dataName, sortCol, viewCols, url, getEl) {
 
   var chart = new google.visualization.PieChart(el);
 
-  chart.draw(view ? view : data, options);
+  chart.draw(view || data, options);
 
   if (url) {
     var sh = selectHandler.bind(null, chart, data, url);
@@ -79,138 +80,61 @@ function drawPieChart(colNames, dataName, sortCol, viewCols, url, getEl) {
   }
 }
 
-drawIdpsChart = drawPieChart.bind(null, ['sourceIdpName', 'sourceIdPEntityId', 'Count'], 'loginCountPerIdp', 2, [0, 2], 'idpDetail.php?entityId=');
+var drawIdpsChart = drawPieChart.bind(null, ['sourceIdpName', 'sourceIdPEntityId', 'Count'], 'loginCountPerIdp', 2, [0, 2], 'idpDetail.php?entityId=');
 
-drawSpsChart = drawPieChart.bind(null, ['service', 'serviceIdentifier', 'Count'], 'accessCountPerService', 2, [0, 2], 'spDetail.php?identifier=');
+var drawSpsChart = drawPieChart.bind(null, ['service', 'serviceIdentifier', 'Count'], 'accessCountPerService', 2, [0, 2], 'spDetail.php?identifier=');
 
-function drawIdpsTable(getEl) {
+function drawTable(cols, dataName, sortCol, viewCols, allowHTML, dateCol, url, getEl) {
   var el = getEl();
   if (!el) return;
 
   var data = new google.visualization.DataTable();
 
-  data.addColumn(
-    'string', getTranslation('tables_identity_provider')
-  );
-  data.addColumn(
-    'string', getTranslation('tables_identity_provider')
-  );
-  data.addColumn(
-    'number', getTranslation('count')
-  );
-  data.addRows(getStatisticsData('loginCountPerIdp'));
+  var col = Object.keys(cols);
+  for (var i = 0; i < col.length; i++) {
+    data.addColumn(
+      cols[col[i]], getTranslation(col[i])
+    );
+  }
 
-  data.sort([{ column: 2, desc: true }]);
+  data.addRows(getStatisticsData(dataName));
 
-  var view = new google.visualization.DataView(data);
+  if (sortCol) {
+    data.sort([{ column: sortCol, desc: true }]);
+  }
 
-  view.setColumns([0, 2]);
-
-  var table = new google.visualization.Table(el);
-
-  table.draw(view);
-
-  var sh = selectHandler.bind(null, table, data, 'idpDetail.php?entityId=');
-  google.visualization.events.addListener(table, 'select', sh);
-}
-
-drawAccessedSpsChart = drawPieChart.bind(null, ['service', 'Count'], 'accessCountForIdentityProviderPerServiceProviders', 1, null, null);
-
-function drawAccessedSpsTable(getEl) {
-  var el = getEl();
-  if (!el) return;
-
-  var data = new google.visualization.DataTable();
-
-  data.addColumn(
-    'string',
-    getTranslation('tables_service_provider')
-  );
-  data.addColumn(
-    'number',
-    getTranslation('count')
-  );
-  data.addRows(
-    getStatisticsData('accessCountForIdentityProviderPerServiceProviders')
-  );
+  var view = null;
+  if (viewCols) {
+    view = new google.visualization.DataView(data);
+    view.setColumns(viewCols);
+  }
 
   var table = new google.visualization.Table(el);
 
-  var options = {
-    allowHtml: true
-  };
+  if (dateCol) {
+    var formatter = new google.visualization.DateFormat({ pattern: 'MMMM  yyyy' });
+    formatter.format(data, dateCol);
+  }
 
-  table.draw(data, options);
+  table.draw(view || data, allowHTML ? { allowHtml: true } : {});
+
+  if (url) {
+    var sh = selectHandler.bind(null, table, data, 'idpDetail.php?entityId=');
+    google.visualization.events.addListener(table, 'select', sh);
+  }
 }
 
-function drawSpsTable(getEl) {
-  var el = getEl();
-  if (!el) return;
+var drawIdpsTable = drawTable.bind(null, { tables_identity_provider: 'string', tables_identity_provider2: 'string', count: 'number' }, 'loginCountPerIdp', 2, [0, 2], false, null, 'idpDetail.php?entityId=');
 
-  var data = new google.visualization.DataTable();
+var drawAccessedSpsChart = drawPieChart.bind(null, ['service', 'Count'], 'accessCountForIdentityProviderPerServiceProviders', 1, null, null);
 
-  data.addColumn(
-    'string',
-    getTranslation('tables_service_provider')
-  );
-  data.addColumn(
-    'string',
-    getTranslation('count')
-  );
-  data.addColumn(
-    'number',
-    getTranslation('count')
-  );
-  data.addRows(
-    getStatisticsData('accessCountPerService')
-  );
+var drawAccessedSpsTable = drawTable.bind(null, { tables_service_provider: 'string', count: 'number' }, 'accessCountForIdentityProviderPerServiceProviders', null, null, true, null, null);
 
-  var view = new google.visualization.DataView(data);
+var drawSpsTable = drawTable.bind(null, { tables_service_provider: 'string', count2: 'string', count: 'number' }, 'accessCountPerService', null, [0, 2], true, 0, 'spDetail.php?identifier=');
 
-  view.setColumns([0, 2]);
+var drawUsedIdpsChart = drawPieChart.bind(null, ['service', 'Count'], 'accessCountForServicePerIdentityProviders', 1, null, null);
 
-  var table = new google.visualization.Table(el);
-
-  var formatter = new google.visualization.DateFormat({ pattern: 'MMMM  yyyy' });
-  formatter.format(data, 0); // Apply formatter to second column
-  var options = {
-    allowHtml: true
-  };
-
-  table.draw(view, options);
-
-  var sh = selectHandler.bind(null, table, data, 'spDetail.php?identifier=');
-  google.visualization.events.addListener(table, 'select', sh);
-}
-
-drawUsedIdpsChart = drawPieChart.bind(null, ['service', 'Count'], 'accessCountForServicePerIdentityProviders', 1, null, null);
-
-function drawUsedIdpsTable(getEl) {
-  var el = getEl();
-  if (!el) return;
-
-  var data = new google.visualization.DataTable();
-
-  data.addColumn(
-    'string',
-    getTranslation('tables_service_provider')
-  );
-  data.addColumn(
-    'number',
-    getTranslation('count')
-  );
-  data.addRows(
-    getStatisticsData('accessCountForServicePerIdentityProviders')
-  );
-
-  var table = new google.visualization.Table(el);
-
-  var options = {
-    allowHtml: true
-  };
-
-  table.draw(data, options);
-}
+var drawUsedIdpsTable = drawTable.bind(null, { tables_service_provider: 'string', count: 'number' }, 'accessCountForServicePerIdentityProviders', null, null, true, null, 'spDetail.php?identifier=');
 
 function getterLoadCallback(getEl, callback) {
   google.charts.setOnLoadCallback(callback.bind(null, getEl));
