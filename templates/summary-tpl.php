@@ -1,5 +1,6 @@
 <?php
 
+use SimpleSAML\Configuration;
 use SimpleSAML\Module\proxystatistics\Auth\Process\DatabaseCommand;
 use SimpleSAML\Module;
 
@@ -8,35 +9,11 @@ use SimpleSAML\Module;
  * @author Dominik Baránek <0Baranek.dominik0@gmail.com>
  */
 
-$lastDays = $this->data['lastDays'];
-
 ?>
-<div class="timeRange">
-    <h4><?php echo $this->t('{proxystatistics:Proxystatistics:templates_time_range}'); ?></h4>
-    <form id="dateSelector" method="post">
-        <input name="tab" value="0" type="hidden">
-        <label>
-            <input id="1" type="radio" name="lastDays" value=0
-                    <?php echo ($lastDays == 0) ? "checked=true" : "" ?>>
-            <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_all}'); ?>
-        </label>
-        <label>
-            <input id="2" type="radio" name="lastDays" value=7
-                    <?php echo ($lastDays == 7) ? "checked=true" : "" ?>>
-            <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_week}'); ?>
-        </label>
-        <label>
-            <input id="3" type="radio" name="lastDays" value=30
-                    <?php echo ($lastDays == 30) ? "checked=true" : "" ?>>
-            <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_month}'); ?>
-        </label>
-        <label>
-            <input id="4" type="radio" name="lastDays" value=365
-                    <?php echo ($lastDays == 365) ? "checked=true" : "" ?>>
-            <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_year}'); ?>
-        </label>
-    </form>
-</div>
+
+<?php
+require 'timeRange.include.php';
+?>
 
 <h2><?php echo $this->t('{proxystatistics:Proxystatistics:templates/graphs_logins}'); ?></h2>
 <div class="legend-logins">
