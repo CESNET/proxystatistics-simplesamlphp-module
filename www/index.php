@@ -15,5 +15,5 @@ $t = new Template($config, 'proxystatistics:statistics-tpl.php');
 $t->data['lastDays'] = filter_input(INPUT_POST, 'lastDays', FILTER_VALIDATE_INT,
     ['options'=>['default'=>0,'min_range'=>0]]);
 $t->data['tab'] = filter_input(INPUT_POST, 'tab', FILTER_VALIDATE_INT,
-    ['options'=>['default'=>1,'min_range'=>1]]);
+    ['options'=>['default'=>0,'min_range'=>1]]);
 $t->show();
