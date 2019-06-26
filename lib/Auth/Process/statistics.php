@@ -54,7 +54,5 @@ class Statistics extends \SimpleSAML\Auth\ProcessingFilter
             Logger::notice('User identity: ' .  $eduPersonUniqueId . ', service: ' . $spEntityId .
                 ', external identity: ' . $sourceIdPEppn . ' from ' . $sourceIdPEntityId);
         }
-
     }
-
 }

@@ -20,13 +20,15 @@ $this->data['head'] .= '<script type="text/javascript" src="https://www.gstatic.
 $this->data['head'] .= '<meta name="loginCountPerDay" id="loginCountPerDay" content="' .
     htmlspecialchars(json_encode(
         DatabaseCommand::getLoginCountPerDayForIdp($lastDays, $idpEntityId),
-    JSON_NUMERIC_CHECK)) . '">';
+        JSON_NUMERIC_CHECK
+    )) . '">';
 $this->data['head'] .=
     '<meta name="accessCountForIdentityProviderPerServiceProviders" ' .
     'id="accessCountForIdentityProviderPerServiceProviders" content="' .
     htmlspecialchars(json_encode(
         DatabaseCommand::getAccessCountForIdentityProviderPerServiceProviders($lastDays, $idpEntityId),
-    JSON_NUMERIC_CHECK)).'">';
+        JSON_NUMERIC_CHECK
+    )).'">';
 $this->data['head'] .= '<meta name="translations" id="translations" content="'.htmlspecialchars(json_encode([
     'tables_identity_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_identity_provider}'),
     'tables_service_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_service_provider}'),

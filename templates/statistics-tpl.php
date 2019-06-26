@@ -44,7 +44,8 @@ $this->data['head'] .= '<meta name="loginCountPerIdp" id="loginCountPerIdp" cont
 $this->data['head'] .= '<meta name="accessCountPerService" id="accessCountPerService" content="' .
     htmlspecialchars(json_encode(
         DatabaseCommand::getAccessCountPerService($this->data['lastDays']),
-    JSON_NUMERIC_CHECK)) . '">';
+        JSON_NUMERIC_CHECK
+    )) . '">';
 $this->data['head'] .= '<meta name="translations" id="translations" content="'.htmlspecialchars(json_encode([
     'tables_identity_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_identity_provider}'),
     'tables_service_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_service_provider}'),
