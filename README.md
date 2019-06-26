@@ -15,7 +15,7 @@ Once you have installed SimpleSAMLphp, installing this module is very simple. Fi
 ## Configuration
 1. Install MySQL Database and create database for statistics and user. 
 2. For this database run script to create tables. Script is available in config-templates/tables.sql.
-3. Copy config-templates/module_statisticsproxy.php to your folder vith config and filled it.
+3. Copy config-templates/module_statisticsproxy.php to your folder vith config and fill it.
 4. Configure IdPAttribute filter from Perun module to get sourceIdPName from IdP metadata:  
 ```
     XX => array(
@@ -26,11 +26,15 @@ Once you have installed SimpleSAMLphp, installing this module is very simple. Fi
     ),
     #where XX is priority(for example 30; Must not be used for other modules)
 ```
-5 . Configure proxystatistic filter
+5. Configure proxystatistic filter
 ```
     XX => array(
             'class' => 'proxystatistics:statistics',
             'config' => array (),
     ),                
     #where XX is priority(for example 50; Must not be used for other modules)
+```
+6. Add to `config.php`:
+```
+'instance_name' => 'Instance name',
 ```
