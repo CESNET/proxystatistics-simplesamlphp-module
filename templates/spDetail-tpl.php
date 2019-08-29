@@ -35,7 +35,7 @@ $this->data['head'] .= '<meta name="translations" id="translations" content="'.h
 
 $spName = DatabaseCommand::getSpNameBySpIdentifier($spIdentifier);
 
-if (!is_null($spName) && !empty($spName)) {
+if ($spName !== null && !empty($spName)) {
     $this->data['header'] = $this->t('{proxystatistics:Proxystatistics:templates/spDetail_header_name}') .
         $spName;
 } else {

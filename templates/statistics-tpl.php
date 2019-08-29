@@ -15,7 +15,7 @@ const INSTANCE_NAME = 'instance_name';
 
 $config = Configuration::getConfig(CONFIG_FILE_NAME);
 $instanceName = $config->getString(INSTANCE_NAME, null);
-if (!is_null($instanceName)) {
+if ($instanceName !== null) {
     $this->data['header'] = $instanceName . ' ' .
         $this->t('{proxystatistics:Proxystatistics:templates/statistics_header}');
 } else {
