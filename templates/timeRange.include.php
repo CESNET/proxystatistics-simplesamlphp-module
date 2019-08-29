@@ -11,7 +11,7 @@
         <?php foreach ($values as $value => $str) : ?>
             <label>
                 <input id="<?php echo $i;?>" type="radio" name="lastDays" value="<?php echo $value;?>"
-                        <?php echo ($this->data['lastDays'] == $value) ? "checked=true" : "" ?>>
+                        <?php echo ($this->data['lastDays'] === $value) ? "checked=true" : "" ?>>
                 <?php echo $this->t('{proxystatistics:Proxystatistics:templates/statistics-tpl_'.$str.'}'); ?>
             </label>
             <?php $i++; ?>

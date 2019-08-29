@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ## Changed
 - is_null() changed to === null
+- == and != changed to === and !==
 
 ## [v3.1.0]
 #### Added
