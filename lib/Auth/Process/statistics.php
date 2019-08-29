@@ -21,7 +21,7 @@ class Statistics extends ProcessingFilter
         parent::__construct($config, $reserved);
 
         if (!isset($config['config'])) {
-            throw new Exception("missing mandatory configuration option 'config'");
+            throw new Exception('missing mandatory configuration option \'config\'');
         }
         $this->config = (array)$config['config'];
         $this->reserved = (array)$reserved;
