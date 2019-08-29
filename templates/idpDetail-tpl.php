@@ -36,7 +36,7 @@ $this->data['head'] .= '<meta name="translations" id="translations" content="'.h
 
 $idpName = DatabaseCommand::getIdPNameByEntityId($idpEntityId);
 
-if (!is_null($idpName) && !empty($idpName)) {
+if ($idpName !== null && !empty($idpName)) {
     $this->data['header'] = $this->t('{proxystatistics:Proxystatistics:templates/idpDetail_header_name}') . $idpName;
 } else {
     $this->data['header'] = $this->t('{proxystatistics:Proxystatistics:templates/idpDetail_header_entityId}') .

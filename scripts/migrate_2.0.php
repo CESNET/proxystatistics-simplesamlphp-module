@@ -23,7 +23,7 @@ $serviceProvidersFileName = '';
 $resultFileName = '';
 
 if (empty($identityProvidersFileName) || empty($serviceProvidersFileName) || empty($resultFileName)) {
-    exit("One of required attributes is empty." . PHP_EOL);
+    exit('One of required attributes is empty.' . PHP_EOL);
 }
 
 $tableName = 'statistics';
@@ -32,7 +32,7 @@ $result = '';
 $line = null;
 
 // Identity providers part
-$file = fopen($identityProvidersFileName, "r");
+$file = fopen($identityProvidersFileName, 'r');
 
 while (!feof($file)) {
     $line = (fgetcsv($file));
@@ -47,7 +47,7 @@ while (!feof($file)) {
 fclose($file);
 
 // Service providers part
-$file = fopen($serviceProvidersFileName, "r");
+$file = fopen($serviceProvidersFileName, 'r');
 
 while (!feof($file)) {
     $line = (fgetcsv($file));

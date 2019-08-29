@@ -77,7 +77,7 @@ class DatabaseConnector
     {
         $conn = mysqli_init();
         if ($this->encryption === true) {
-            Logger::debug("Getting connection with encryption.");
+            Logger::debug('Getting connection with encryption.');
             mysqli_ssl_set(
                 $conn,
                 $this->sslKey,
@@ -95,7 +95,7 @@ class DatabaseConnector
             $this->databaseName,
             $this->port
         );
-        mysqli_set_charset($conn, "utf8");
+        mysqli_set_charset($conn, 'utf8');
         return $conn;
     }
 
