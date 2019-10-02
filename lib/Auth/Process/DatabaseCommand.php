@@ -19,18 +19,18 @@ class DatabaseCommand
         $statisticsTableName = $databaseConnector->getStatisticsTableName();
         $identityProvidersMapTableName = $databaseConnector->getIdentityProvidersMapTableName();
         $serviceProvidersMapTableName = $databaseConnector->getServiceProvidersMapTableName();
-        
+
         if (!in_array($databaseConnector->getMode(), ['PROXY', 'IDP', 'SP'])) {
             throw new Exception('Unknown mode is set. Mode has to be one of the following: PROXY, IDP, SP.');
         }
-        
+
         if ($databaseConnector->getMode() !== 'IDP') {
             $idpName = $request['Attributes']['sourceIdPName'][0];
             $idpEntityID = $request['saml:sp:IdP'];
         }
         if ($databaseConnector->getMode() !== 'SP') {
             $spEntityId = $request['Destination']['entityid'];
-            $spName = $request['Destination']['name']['en'];
+            $spName = isset($request['Destination']['name']) ? $request['Destination']['name']['en'] : '';
         }
 
         if (!in_array($databaseConnector->getMode(), ['PROXY', 'IDP', 'SP'])) {
