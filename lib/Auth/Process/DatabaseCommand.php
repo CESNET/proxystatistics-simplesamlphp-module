@@ -140,27 +140,20 @@ class DatabaseCommand
         $conn = $databaseConnector->getConnection();
         assert($conn != null);
         $table_name = $databaseConnector->getStatisticsTableName();
-        if ($days == 0) {    // 0 = all time
-            $stmt = $conn->prepare(
-                "SELECT year, month, day, SUM(count) AS count " .
-                "FROM " . $table_name . " " .
-                "WHERE service != '' " .
-                "GROUP BY year,month,day " .
-                "ORDER BY year ASC,month ASC,day ASC"
-            );
-        } else {
-            $stmt = $conn->prepare(
-                "SELECT year, month, day, SUM(count) AS count " .
-                "FROM " . $table_name . " " .
-                "WHERE service != '' AND " .
-                "CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE()" .
-                "GROUP BY year,month,day " .
-                "ORDER BY year ASC,month ASC,day ASC"
-            );
-            $stmt->bind_param('d', $days);
+        $query = "SELECT year, month, day, SUM(count) AS count " .
+                 "FROM " . $table_name . " " .
+                 "WHERE service != '' ";
+        $params = [];
+        if ($days != 0) {    // 0 = all time
+            $query .= "AND " .
+                      "CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
+                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
+            $params[':days'] = $days;
         }
-        $stmt->execute();
+        $query .= "GROUP BY year,month,day " .
+                  "ORDER BY year ASC,month ASC,day ASC";
+        $stmt = $conn->prepare($query);
+        $stmt->execute($params);
         $result = $stmt->get_result();
         $r = $result->fetch_all(MYSQLI_ASSOC);
         $conn->close();
@@ -173,28 +166,19 @@ class DatabaseCommand
         $conn = $databaseConnector->getConnection();
         assert($conn != null);
         $table_name = $databaseConnector->getStatisticsTableName();
-        if ($days == 0) {    // 0 = all time
-            $stmt = $conn->prepare(
-                "SELECT year, month, day, SUM(count) AS count " .
-                    "FROM " . $table_name . " " .
-                    "WHERE service=? " .
-                    "GROUP BY year,month,day " .
-                    "ORDER BY year ASC,month ASC,day ASC"
-            );
-            $stmt->bind_param('s', $spIdentifier);
-        } else {
-            $stmt = $conn->prepare(
-                "SELECT year, month, day, SUM(count) AS count " .
-                "FROM " . $table_name . " " .
-                "WHERE service=? " .
-                "AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
-                "GROUP BY year,month,day " .
-                "ORDER BY year ASC,month ASC,day ASC"
-            );
-            $stmt->bind_param('sd', $spIdentifier, $days);
+        $query = "SELECT year, month, day, SUM(count) AS count " .
+                 "FROM " . $table_name . " " .
+                 "WHERE service=:service ";
+        $params = [':service' => $spIdentifier];
+        if ($days != 0) {    // 0 = all time
+            $query .= "AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
+                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
+            $params[':days'] = $days;
         }
-        $stmt->execute();
+        $query .= "GROUP BY year,month,day " .
+                  "ORDER BY year ASC,month ASC,day ASC";
+        $stmt = $conn->prepare($query);
+        $stmt->execute($params);
         $result = $stmt->get_result();
         $r = $result->fetch_all(MYSQLI_ASSOC);
         $conn->close();
@@ -207,28 +191,19 @@ class DatabaseCommand
         $conn = $databaseConnector->getConnection();
         assert($conn != null);
         $table_name = $databaseConnector->getStatisticsTableName();
-        if ($days == 0) {    // 0 = all time
-            $stmt = $conn->prepare(
-                "SELECT year, month, day, SUM(count) AS count " .
-                "FROM " . $table_name . " " .
-                "WHERE sourceIdP=? " .
-                "GROUP BY year,month,day " .
-                "ORDER BY year ASC,month ASC,day ASC"
-            );
-            $stmt->bind_param('s', $idpIdentifier);
-        } else {
-            $stmt = $conn->prepare(
-                "SELECT year, month, day, SUM(count) AS count " .
-                "FROM " . $table_name . " " .
-                "WHERE sourceIdP=? " .
-                "AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
-                "GROUP BY year,month,day " .
-                "ORDER BY year ASC,month ASC,day ASC"
-            );
-            $stmt->bind_param('sd', $idpIdentifier, $days);
+        $query = "SELECT year, month, day, SUM(count) AS count " .
+                 "FROM " . $table_name . " " .
+                 "WHERE sourceIdP=:sourceIdP ";
+        $params = [':sourceIdP'=>$idpIdentifier];
+        if ($days != 0) {    // 0 = all time
+            $query .= "AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
+                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
+            $params[':days'] = $days;
         }
-        $stmt->execute();
+        $query .= "GROUP BY year,month,day " .
+                  "ORDER BY year ASC,month ASC,day ASC";
+        $stmt = $conn->prepare($query);
+        $stmt->execute($params);
         $result = $stmt->get_result();
         $r = $result->fetch_all(MYSQLI_ASSOC);
         $conn->close();
@@ -242,27 +217,20 @@ class DatabaseCommand
         assert($conn != null);
         $table_name = $databaseConnector->getStatisticsTableName();
         $serviceProvidersMapTableName = $databaseConnector->getServiceProvidersMapTableName();
-        if ($days == 0) {    // 0 = all time
-            $stmt = $conn->prepare(
-                "SELECT IFNULL(name,service) AS spName, service, SUM(count) AS count " .
-                "FROM " . $serviceProvidersMapTableName . " " .
-                "LEFT OUTER JOIN " . $table_name . " ON service = identifier " .
-                "GROUP BY service HAVING service != '' " .
-                "ORDER BY count DESC"
+        $query = "SELECT IFNULL(name,service) AS spName, service, SUM(count) AS count " .
+                 "FROM " . $serviceProvidersMapTableName . " " .
+                 "LEFT OUTER JOIN " . $table_name . " ON service = identifier ";
+        $params = [];
+        if ($days != 0) {    // 0 = all time
+            $query .= "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
+                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
             );
-        } else {
-            $stmt = $conn->prepare(
-                "SELECT IFNULL(name,service) AS spName, service, SUM(count) AS count " .
-                "FROM " . $serviceProvidersMapTableName . " " .
-                "LEFT OUTER JOIN " . $table_name . "  ON service = identifier " .
-                "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
-                "GROUP BY service HAVING service != '' " .
-                "ORDER BY count DESC"
-            );
-            $stmt->bind_param('d', $days);
+            $params[':days'] = $days;
         }
-        $stmt->execute();
+        $query .= "GROUP BY service HAVING service != '' " .
+                  "ORDER BY count DESC";
+        $stmt = $conn->prepare($query);
+        $stmt->execute($params);
         $result = $stmt->get_result();
         $r = $result->fetch_all(MYSQLI_NUM);
         $conn->close();
@@ -276,28 +244,19 @@ class DatabaseCommand
         assert($conn != null);
         $table_name = $databaseConnector->getStatisticsTableName();
         $identityProvidersMapTableName = $databaseConnector->getIdentityProvidersMapTableName();
-        if ($days == 0) {    // 0 = all time
-            $stmt = $conn->prepare(
-                "SELECT IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
-                "FROM " . $identityProvidersMapTableName . " " .
-                "LEFT OUTER JOIN " . $table_name . " ON sourceIdp = entityId " .
-                "GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service=? " .
-                "ORDER BY count DESC"
-            );
-            $stmt->bind_param('s', $spIdentifier);
-        } else {
-            $stmt = $conn->prepare(
-                "SELECT IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
-                "FROM " . $identityProvidersMapTableName . " " .
-                "LEFT OUTER JOIN " . $table_name . "  ON sourceIdp = entityId " .
-                "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
-                "GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service=? " .
-                "ORDER BY count DESC"
-            );
-            $stmt->bind_param('ds', $days, $spIdentifier);
+        $query = "SELECT IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
+                 "FROM " . $identityProvidersMapTableName . " " .
+                 "LEFT OUTER JOIN " . $table_name . " ON sourceIdp = entityId ";
+        $params = [':service' => $spIdentifier];
+        if ($days != 0) {    // 0 = all time
+            $query .= "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
+                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
+            $params[':days'] = $days;
         }
-        $stmt->execute();
+        $query .= "GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service=:service " .
+                  "ORDER BY count DESC";
+        $stmt = $conn->prepare($query);
+        $stmt->execute($params);
         $result = $stmt->get_result();
         $r = $result->fetch_all(MYSQLI_NUM);
         $conn->close();
@@ -311,28 +270,19 @@ class DatabaseCommand
         assert($conn != null);
         $table_name = $databaseConnector->getStatisticsTableName();
         $serviceProvidersMapTableName = $databaseConnector->getServiceProvidersMapTableName();
-        if ($days == 0) {    // 0 = all time
-            $stmt = $conn->prepare(
-                "SELECT IFNULL(name,service) AS spName, SUM(count) AS count " .
-                "FROM " . $serviceProvidersMapTableName . " " .
-                "LEFT OUTER JOIN " . $table_name . " ON service = identifier " .
-                "GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp=? " .
-                "ORDER BY count DESC"
-            );
-            $stmt->bind_param('s', $idpEntityId);
-        } else {
-            $stmt = $conn->prepare(
-                "SELECT IFNULL(name,service) AS spName, SUM(count) AS count " .
-                "FROM " . $serviceProvidersMapTableName . " " .
-                "LEFT OUTER JOIN " . $table_name . "  ON service = identifier " .
-                "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
-                "GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp=? " .
-                "ORDER BY count DESC"
-            );
-            $stmt->bind_param('ds', $days, $idpEntityId);
+        $query = "SELECT IFNULL(name,service) AS spName, SUM(count) AS count " .
+                 "FROM " . $serviceProvidersMapTableName . " " .
+                 "LEFT OUTER JOIN " . $table_name . " ON service = identifier ";
+        $params = [':sourceIdp'=>$idpEntityId];
+        if ($days != 0) {    // 0 = all time
+            $query .= "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
+                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
+            $params[':days'] = $days;
         }
-        $stmt->execute();
+        $query .= "GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp=:sourceIdp " .
+                  "ORDER BY count DESC";
+        $stmt = $conn->prepare($query);
+        $stmt->execute($params);
         $result = $stmt->get_result();
         $r = $result->fetch_all(MYSQLI_NUM);
         $conn->close();
@@ -346,27 +296,19 @@ class DatabaseCommand
         assert($conn != null);
         $tableName = $databaseConnector->getStatisticsTableName();
         $identityProvidersMapTableName = $databaseConnector->getIdentityProvidersMapTableName();
-        if ($days == 0) {    // 0 = all time
-            $stmt = $conn->prepare(
-                "SELECT IFNULL(name,sourceIdp) AS idpName, sourceIdp, SUM(count) AS count " .
-                "FROM " . $identityProvidersMapTableName . " " .
-                "LEFT OUTER JOIN " . $tableName . " ON sourceIdp = entityId " .
-                "GROUP BY sourceIdp HAVING sourceIdp != '' " .
-                "ORDER BY count DESC"
-            );
-        } else {
-            $stmt = $conn->prepare(
-                "SELECT IFNULL(name,sourceIdp) AS idpName, sourceIdp, SUM(count) AS count " .
-                "FROM " . $identityProvidersMapTableName . " " .
-                "LEFT OUTER JOIN " . $tableName . " ON sourceIdp = entityId " .
-                "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
-                "GROUP BY sourceIdp HAVING sourceIdp != '' " .
-                "ORDER BY count DESC"
-            );
-            $stmt->bind_param('d', $days);
+        $query = "SELECT IFNULL(name,sourceIdp) AS idpName, sourceIdp, SUM(count) AS count " .
+                 "FROM " . $identityProvidersMapTableName . " " .
+                 "LEFT OUTER JOIN " . $tableName . " ON sourceIdp = entityId ";
+        $params = [];
+        if ($days != 0) {    // 0 = all time
+            $query .= "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
+                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
+            $params[':days'] = $days;
         }
-        $stmt->execute();
+        $query .= "GROUP BY sourceIdp HAVING sourceIdp != '' " .
+                  "ORDER BY count DESC";
+        $stmt = $conn->prepare($query);
+        $stmt->execute($params);
         $result = $stmt->get_result();
         $r = $result->fetch_all(MYSQLI_NUM);
         $conn->close();
