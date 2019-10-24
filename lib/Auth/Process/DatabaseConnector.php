@@ -3,7 +3,9 @@
 namespace SimpleSAML\Module\proxystatistics\Auth\Process;
 
 use SimpleSAML\Configuration;
+use SimpleSAML\Database;
 use SimpleSAML\Logger;
+use PDO;
 
 /**
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
@@ -11,19 +13,9 @@ use SimpleSAML\Logger;
 
 class DatabaseConnector
 {
-    private $serverName;
-    private $port;
-    private $username;
-    private $password;
-    private $databaseName;
     private $statisticsTableName;
     private $identityProvidersMapTableName;
     private $serviceProvidersMapTableName;
-    private $encryption;
-    private $sslCA;
-    private $sslCert;
-    private $sslKey;
-    private $sslCAPath;
     private $mode;
     private $idpEntityId;
     private $idpName;
@@ -41,6 +33,7 @@ class DatabaseConnector
     const IDP_MAP_TABLE_NAME = 'identityProvidersMapTableName';
     const SP_MAP_TABLE_NAME = 'serviceProvidersMapTableName';
     const ENCRYPTION = 'encryption';
+    const STORE = 'store';
     const SSL_CA = 'ssl_ca';
     const SSL_CERT = 'ssl_cert_path';
     const SSL_KEY = 'ssl_key_path';
@@ -54,19 +47,38 @@ class DatabaseConnector
     public function __construct()
     {
         $conf = Configuration::getConfig(self::CONFIG_FILE_NAME);
-        $this->serverName = $conf->getString(self::SERVER);
-        $this->port = $conf->getInteger(self::PORT, 3306);
-        $this->username = $conf->getString(self::USER);
-        $this->password = $conf->getString(self::PASSWORD);
-        $this->databaseName = $conf->getString(self::DATABASE);
+        $this->storeConfig = $conf->getArray(self::STORE, null);
+
+        // TODO: remove
+        if (empty($this->storeConfig) && $conf->getString(self::DATABASE, false)) {
+            $this->storeConfig = [
+                'database.dsn' => sprintf(
+                    'mysql:host=%s;port=%d;dbname=%s;charset=utf8',
+                    $conf->getString(self::SERVER, 'localhost'),
+                    $conf->getInteger(self::PORT, 3306),
+                    $conf->getString(self::DATABASE)
+                ),
+                'database.username' => $conf->getString(self::USER),
+                'database.password' => $conf->getString(self::PASSWORD),
+            ];
+            if ($conf->getBoolean(self::ENCRYPTION, false)) {
+                Logger::debug("Getting connection with encryption.");
+                $this->storeConfig['database.driver_options'] = [
+                    PDO::MYSQL_ATTR_SSL_KEY => $conf->getString(self::SSL_KEY, ''),
+                    PDO::MYSQL_ATTR_SSL_CERT => $conf->getString(self::SSL_CERT, ''),
+                    PDO::MYSQL_ATTR_SSL_CA => $conf->getString(self::SSL_CA, ''),
+                    PDO::MYSQL_ATTR_SSL_CAPATH => $conf->getString(self::SSL_CA_PATH, ''),
+                ];
+            }
+
+            Logger::debug("Deprecated option(s) used for proxystatistics. Please use the store option.");
+        }
+
+        $this->storeConfig = Configuration::loadFromArray($this->storeConfig);
+
         $this->statisticsTableName = $conf->getString(self::STATS_TABLE_NAME);
         $this->identityProvidersMapTableName = $conf->getString(self::IDP_MAP_TABLE_NAME);
         $this->serviceProvidersMapTableName = $conf->getString(self::SP_MAP_TABLE_NAME);
-        $this->encryption = $conf->getBoolean(self::ENCRYPTION, false);
-        $this->sslCA = $conf->getString(self::SSL_CA, '');
-        $this->sslCert = $conf->getString(self::SSL_CERT, '');
-        $this->sslKey = $conf->getString(self::SSL_KEY, '');
-        $this->sslCAPath = $conf->getString(self::SSL_CA_PATH, '');
         $this->mode = $conf->getString(self::MODE, 'PROXY');
         $this->idpEntityId = $conf->getString(self::IDP_ENTITY_ID, '');
         $this->idpName = $conf->getString(self::IDP_NAME, '');
@@ -76,37 +88,7 @@ class DatabaseConnector
 
     public function getConnection()
     {
-        if ($this->conn === null) {
-            $this->conn = mysqli_init();
-            if ($this->encryption === true) {
-                Logger::debug("Getting connection with encryption.");
-                mysqli_ssl_set(
-                    $this->conn,
-                    $this->sslKey,
-                    $this->sslCert,
-                    $this->sslCA,
-                    $this->sslCAPath,
-                    null
-                );
-            }
-            mysqli_real_connect(
-                $this->conn,
-                $this->serverName,
-                $this->username,
-                $this->password,
-                $this->databaseName,
-                $this->port
-            );
-            mysqli_set_charset($this->conn, "utf8");
-        }
-        return $this->conn;
-    }
-
-    public function closeConnection()
-    {
-        if ($this->conn !== null) {
-            mysqli_close($this->conn);
-        }
+        return Database::getInstance($this->storeConfig);
     }
 
     public function getStatisticsTableName()

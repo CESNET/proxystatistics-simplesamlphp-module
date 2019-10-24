@@ -4,6 +4,7 @@ namespace SimpleSAML\Module\proxystatistics\Auth\Process;
 
 use SimpleSAML\Error\Exception;
 use SimpleSAML\Logger;
+use PDO;
 
 /**
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
@@ -24,11 +25,6 @@ class DatabaseCommand
         $this->statisticsTableName = $this->databaseConnector->getStatisticsTableName();
         $this->identityProvidersMapTableName = $this->databaseConnector->getIdentityProvidersMapTableName();
         $this->serviceProvidersMapTableName = $this->databaseConnector->getServiceProvidersMapTableName();
-    }
-
-    public function __destruct()
-    {
-        $this->databaseConnector->closeConnection();
     }
 
     public function insertLogin(&$request, &$date)
@@ -76,34 +72,28 @@ class DatabaseCommand
                 " is empty and login log wasn't inserted into the database."
             );
         } else {
-            $stmt = $this->conn->prepare(
+            if ($this->conn->write(
                 "INSERT INTO " . $this->statisticsTableName . "(year, month, day, sourceIdp, service, count)" .
-                " VALUES (?, ?, ?, ?, ?, '1') ON DUPLICATE KEY UPDATE count = count + 1"
-            );
-            $stmt->bind_param("iiiss", $year, $month, $day, $idpEntityID, $spEntityId);
-            if ($stmt->execute() === false) {
+                " VALUES (:year, :month, :day, :idp, :sp, '1') ON DUPLICATE KEY UPDATE count = count + 1",
+                ['year'=>$year, 'month'=>$month, 'day'=>$day, 'idp'=>$idpEntityID, 'sp'=>$spEntityId]
+            ) === false) {
                 Logger::error("The login log wasn't inserted into table: " . $this->statisticsTableName . ".");
             }
 
             if (!empty($idpName)) {
-                $stmt->prepare(
+                $this->conn->write(
                     "INSERT INTO " . $this->identityProvidersMapTableName .
-                    "(entityId, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = ?"
+                    "(entityId, name) VALUES (:idp, :name1) ON DUPLICATE KEY UPDATE name = :name2",
+                    ['idp'=>$idpEntityID, 'name1'=>$idpName, 'name2'=>$idpName]
                 );
-                $stmt->bind_param("sss", $idpEntityID, $idpName, $idpName);
-                $stmt->execute();
             }
 
             if (!empty($spName)) {
-                $stmt->prepare(
+                $this->conn->write(
                     "INSERT INTO " . $this->serviceProvidersMapTableName .
-                    "(identifier, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = ?"
+                    "(identifier, name) VALUES (:sp, :name1) ON DUPLICATE KEY UPDATE name = :name2",
+                    ['sp'=>$spEntityId, 'name1'=>$spName, 'name2'=>$spName]
                 );
-                $stmt->bind_param("sss", $spEntityId, $spName, $spName);
-                $success = $stmt->execute();
-                if ($success) {
-                    Logger::info("The login log was successfully stored in database");
-                }
             }
         }
 
@@ -112,28 +102,22 @@ class DatabaseCommand
 
     public function getSpNameBySpIdentifier($identifier)
     {
-        $stmt = $this->conn->prepare(
+        return $this->conn->read(
             "SELECT name " .
             "FROM " . $this->serviceProvidersMapTableName . " " .
-            "WHERE identifier=?"
-        );
-        $stmt->bind_param('s', $identifier);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        return $result->fetch_assoc()["name"];
+            "WHERE identifier=:sp",
+            ['sp'=>$identifier]
+        )->fetchColumn();
     }
 
     public function getIdPNameByEntityId($idpEntityId)
     {
-        $stmt = $this->conn->prepare(
+        return $this->conn->read(
             "SELECT name " .
             "FROM " . $this->identityProvidersMapTableName . " " .
-            "WHERE entityId=?"
-        );
-        $stmt->bind_param('s', $idpEntityId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        return $result->fetch_assoc()["name"];
+            "WHERE entityId=:idp",
+            ['idp'=>$idpEntityId]
+        )->fetchColumn();
     }
 
     public function getLoginCountPerDay($days)
@@ -145,11 +129,8 @@ class DatabaseCommand
         self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY year,month,day " .
                   "ORDER BY year ASC,month ASC,day ASC";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
-        $result = $stmt->get_result();
-        $r = $result->fetch_all(MYSQLI_ASSOC);
-        return $r;
+
+        return $this->conn->read($query, $params)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getLoginCountPerDayForService($days, $spIdentifier)
@@ -157,15 +138,12 @@ class DatabaseCommand
         $query = "SELECT year, month, day, SUM(count) AS count " .
                  "FROM " . $this->statisticsTableName . " " .
                  "WHERE service=:service ";
-        $params = [':service' => $spIdentifier];
+        $params = ['service' => $spIdentifier];
         self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY year,month,day " .
                   "ORDER BY year ASC,month ASC,day ASC";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
-        $result = $stmt->get_result();
-        $r = $result->fetch_all(MYSQLI_ASSOC);
-        return $r;
+
+        return $this->conn->read($query, $params)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getLoginCountPerDayForIdp($days, $idpIdentifier)
@@ -173,15 +151,12 @@ class DatabaseCommand
         $query = "SELECT year, month, day, SUM(count) AS count " .
                  "FROM " . $this->statisticsTableName . " " .
                  "WHERE sourceIdP=:sourceIdP ";
-        $params = [':sourceIdP'=>$idpIdentifier];
+        $params = ['sourceIdP'=>$idpIdentifier];
         self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY year,month,day " .
                   "ORDER BY year ASC,month ASC,day ASC";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
-        $result = $stmt->get_result();
-        $r = $result->fetch_all(MYSQLI_ASSOC);
-        return $r;
+
+        return $this->conn->read($query, $params)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getAccessCountPerService($days)
@@ -193,11 +168,8 @@ class DatabaseCommand
         self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY service HAVING service != '' " .
                   "ORDER BY count DESC";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
-        $result = $stmt->get_result();
-        $r = $result->fetch_all(MYSQLI_NUM);
-        return $r;
+
+        return $this->conn->read($query, $params)->fetchAll(PDO::FETCH_NUM);
     }
 
     public function getAccessCountForServicePerIdentityProviders($days, $spIdentifier)
@@ -205,15 +177,12 @@ class DatabaseCommand
         $query = "SELECT IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
                  "FROM " . $this->identityProvidersMapTableName . " " .
                  "LEFT OUTER JOIN " . $this->statisticsTableName . " ON sourceIdp = entityId ";
-        $params = [':service' => $spIdentifier];
+        $params = ['service' => $spIdentifier];
         self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service=:service " .
                   "ORDER BY count DESC";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
-        $result = $stmt->get_result();
-        $r = $result->fetch_all(MYSQLI_NUM);
-        return $r;
+
+        return $this->conn->read($query, $params)->fetchAll(PDO::FETCH_NUM);
     }
 
     public function getAccessCountForIdentityProviderPerServiceProviders($days, $idpEntityId)
@@ -221,15 +190,12 @@ class DatabaseCommand
         $query = "SELECT IFNULL(name,service) AS spName, SUM(count) AS count " .
                  "FROM " . $this->serviceProvidersMapTableName . " " .
                  "LEFT OUTER JOIN " . $this->statisticsTableName . " ON service = identifier ";
-        $params = [':sourceIdp'=>$idpEntityId];
+        $params = ['sourceIdp'=>$idpEntityId];
         self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp=:sourceIdp " .
                   "ORDER BY count DESC";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
-        $result = $stmt->get_result();
-        $r = $result->fetch_all(MYSQLI_NUM);
-        return $r;
+
+        return $this->conn->read($query, $params)->fetchAll(PDO::FETCH_NUM);
     }
 
     public function getLoginCountPerIdp($days)
@@ -241,14 +207,11 @@ class DatabaseCommand
         self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY sourceIdp HAVING sourceIdp != '' " .
                   "ORDER BY count DESC";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
-        $result = $stmt->get_result();
-        $r = $result->fetch_all(MYSQLI_NUM);
-        return $r;
+
+        return $this->conn->read($query, $params)->fetchAll(PDO::FETCH_NUM);
     }
 
-    private static addDaysRange($days, &$query, &$params) {
+    private static function addDaysRange($days, &$query, &$params) {
     if ($days != 0) {    // 0 = all time
         if (stripos($query, "WHERE") === false) {
             $query .= "WHERE";
@@ -257,7 +220,7 @@ class DatabaseCommand
         }
         $query .= " CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
                   "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
-        $params[':days'] = $days;
+        $params['days'] = $days;
     }
     }
 }
