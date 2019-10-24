@@ -8,9 +8,6 @@ CREATE TABLE statistics (
     count INT,
     INDEX (sourceIdp),
     INDEX (service),
-    INDEX (year),
-    INDEX (year,month),
-    INDEX (year,month,day),
     PRIMARY KEY (year, month, day, sourceIdp, service)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
