@@ -38,29 +38,15 @@ $config = [
     'spName' => '',
 
     /*
-     * Fill the serverName
+     * Fill config for SimpleSAML\Database.
+     * If not set, the global config is used.
+     * @see SimpleSAML\Database
      */
-    'serverName' => 'localhost',
-
-    /*
-     * If you want to use the default port, please comment option 'port'
-     */
-    'port' => 3306,
-
-    /*
-     * Fill the user name
-     */
-    'userName' => 'stats',
-
-    /*
-     * Fill the password
-     */
-    'password' => 'stats',
-
-    /*
-     * Fill the database name
-     */
-    'databaseName' => 'STATS',
+    'store' => [
+        'database.dsn' => 'mysql:host=localhost;port=3306;dbname=STATS;charset=utf8',
+        'database.username' => 'stats',
+        'database.password' => 'stats',
+    ],
 
     /*
      * Fill the table name for statistics
