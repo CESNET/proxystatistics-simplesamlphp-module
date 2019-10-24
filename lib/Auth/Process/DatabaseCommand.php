@@ -144,12 +144,7 @@ class DatabaseCommand
                  "FROM " . $table_name . " " .
                  "WHERE service != '' ";
         $params = [];
-        if ($days != 0) {    // 0 = all time
-            $query .= "AND " .
-                      "CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
-            $params[':days'] = $days;
-        }
+        self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY year,month,day " .
                   "ORDER BY year ASC,month ASC,day ASC";
         $stmt = $conn->prepare($query);
@@ -170,11 +165,7 @@ class DatabaseCommand
                  "FROM " . $table_name . " " .
                  "WHERE service=:service ";
         $params = [':service' => $spIdentifier];
-        if ($days != 0) {    // 0 = all time
-            $query .= "AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
-            $params[':days'] = $days;
-        }
+        self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY year,month,day " .
                   "ORDER BY year ASC,month ASC,day ASC";
         $stmt = $conn->prepare($query);
@@ -195,11 +186,7 @@ class DatabaseCommand
                  "FROM " . $table_name . " " .
                  "WHERE sourceIdP=:sourceIdP ";
         $params = [':sourceIdP'=>$idpIdentifier];
-        if ($days != 0) {    // 0 = all time
-            $query .= "AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
-            $params[':days'] = $days;
-        }
+        self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY year,month,day " .
                   "ORDER BY year ASC,month ASC,day ASC";
         $stmt = $conn->prepare($query);
@@ -221,12 +208,7 @@ class DatabaseCommand
                  "FROM " . $serviceProvidersMapTableName . " " .
                  "LEFT OUTER JOIN " . $table_name . " ON service = identifier ";
         $params = [];
-        if ($days != 0) {    // 0 = all time
-            $query .= "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
-            );
-            $params[':days'] = $days;
-        }
+        self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY service HAVING service != '' " .
                   "ORDER BY count DESC";
         $stmt = $conn->prepare($query);
@@ -248,11 +230,7 @@ class DatabaseCommand
                  "FROM " . $identityProvidersMapTableName . " " .
                  "LEFT OUTER JOIN " . $table_name . " ON sourceIdp = entityId ";
         $params = [':service' => $spIdentifier];
-        if ($days != 0) {    // 0 = all time
-            $query .= "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
-            $params[':days'] = $days;
-        }
+        self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service=:service " .
                   "ORDER BY count DESC";
         $stmt = $conn->prepare($query);
@@ -274,11 +252,7 @@ class DatabaseCommand
                  "FROM " . $serviceProvidersMapTableName . " " .
                  "LEFT OUTER JOIN " . $table_name . " ON service = identifier ";
         $params = [':sourceIdp'=>$idpEntityId];
-        if ($days != 0) {    // 0 = all time
-            $query .= "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
-            $params[':days'] = $days;
-        }
+        self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp=:sourceIdp " .
                   "ORDER BY count DESC";
         $stmt = $conn->prepare($query);
@@ -300,11 +274,7 @@ class DatabaseCommand
                  "FROM " . $identityProvidersMapTableName . " " .
                  "LEFT OUTER JOIN " . $tableName . " ON sourceIdp = entityId ";
         $params = [];
-        if ($days != 0) {    // 0 = all time
-            $query .= "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
-            $params[':days'] = $days;
-        }
+        self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY sourceIdp HAVING sourceIdp != '' " .
                   "ORDER BY count DESC";
         $stmt = $conn->prepare($query);
@@ -313,5 +283,13 @@ class DatabaseCommand
         $r = $result->fetch_all(MYSQLI_NUM);
         $conn->close();
         return $r;
+    }
+
+    private static addDaysRange($days, &$query, &$params) {
+        if ($days != 0) {    // 0 = all time
+            $query .= "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
+                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
+            $params[':days'] = $days;
+        }
     }
 }
