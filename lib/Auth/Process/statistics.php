@@ -30,7 +30,8 @@ class Statistics extends ProcessingFilter
     public function process(&$request)
     {
         $dateTime = new DateTime();
-        DatabaseCommand::insertLogin($request, $dateTime);
+        $dbCmd = new DatabaseCommand();
+        $dbCmd->insertLogin($request, $dateTime);
         $spEntityId = $request['SPMetadata']['entityid'];
 
         $eduPersonUniqueId = '';

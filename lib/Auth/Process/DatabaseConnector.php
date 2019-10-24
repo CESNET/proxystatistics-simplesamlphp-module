@@ -29,6 +29,7 @@ class DatabaseConnector
     private $idpName;
     private $spEntityId;
     private $spName;
+    private $conn = null;
 
     const CONFIG_FILE_NAME = 'module_statisticsproxy.php';
     const SERVER = 'serverName';
@@ -75,28 +76,37 @@ class DatabaseConnector
 
     public function getConnection()
     {
-        $conn = mysqli_init();
-        if ($this->encryption === true) {
-            Logger::debug("Getting connection with encryption.");
-            mysqli_ssl_set(
-                $conn,
-                $this->sslKey,
-                $this->sslCert,
-                $this->sslCA,
-                $this->sslCAPath,
-                null
+        if ($this->conn === null) {
+            $this->conn = mysqli_init();
+            if ($this->encryption === true) {
+                Logger::debug("Getting connection with encryption.");
+                mysqli_ssl_set(
+                    $this->conn,
+                    $this->sslKey,
+                    $this->sslCert,
+                    $this->sslCA,
+                    $this->sslCAPath,
+                    null
+                );
+            }
+            mysqli_real_connect(
+                $this->conn,
+                $this->serverName,
+                $this->username,
+                $this->password,
+                $this->databaseName,
+                $this->port
             );
+            mysqli_set_charset($this->conn, "utf8");
         }
-        mysqli_real_connect(
-            $conn,
-            $this->serverName,
-            $this->username,
-            $this->password,
-            $this->databaseName,
-            $this->port
-        );
-        mysqli_set_charset($conn, "utf8");
-        return $conn;
+        return $this->conn;
+    }
+
+    public function closeConnection()
+    {
+        if ($this->conn !== null) {
+            mysqli_close($this->conn);
+        }
     }
 
     public function getStatisticsTableName()

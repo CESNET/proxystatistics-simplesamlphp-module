@@ -32,17 +32,16 @@ if (!isset($this->data['lastDays'])) {
 if (!isset($this->data['tab'])) {
     $this->data['tab'] = 1;
 }
+$dbCmd = new DatabaseCommand();
 $this->data['head'] .= '<meta name="loginCountPerDay" id="loginCountPerDay" content="' .
-    htmlspecialchars(json_encode(DatabaseCommand::getLoginCountPerDay($this->data['lastDays']), JSON_NUMERIC_CHECK))
+    htmlspecialchars(json_encode($dbCmd->getLoginCountPerDay($this->data['lastDays']), JSON_NUMERIC_CHECK))
     . '">';
 $this->data['head'] .= '<meta name="loginCountPerIdp" id="loginCountPerIdp" content="' .
-    htmlspecialchars(json_encode(DatabaseCommand::getLoginCountPerIdp($this->data['lastDays']), JSON_NUMERIC_CHECK))
+    htmlspecialchars(json_encode($dbCmd->getLoginCountPerIdp($this->data['lastDays']), JSON_NUMERIC_CHECK))
     . '">';
 $this->data['head'] .= '<meta name="accessCountPerService" id="accessCountPerService" content="' .
-    htmlspecialchars(json_encode(
-        DatabaseCommand::getAccessCountPerService($this->data['lastDays']),
-        JSON_NUMERIC_CHECK
-    )) . '">';
+    htmlspecialchars(json_encode($dbCmd->getAccessCountPerService($this->data['lastDays']), JSON_NUMERIC_CHECK))
+    . '">';
 $this->data['head'] .= '<meta name="translations" id="translations" content="'.htmlspecialchars(json_encode([
     'tables_identity_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_identity_provider}'),
     'tables_service_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_service_provider}'),

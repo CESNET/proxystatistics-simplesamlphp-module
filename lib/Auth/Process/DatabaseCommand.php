@@ -10,25 +10,37 @@ use SimpleSAML\Logger;
  */
 class DatabaseCommand
 {
+    private $databaseConnector;
+    private $conn;
+    private $statisticsTableName;
+    private $identityProvidersMapTableName;
+    private $serviceProvidersMapTableName;
 
-    public static function insertLogin(&$request, &$date)
+    public function __construct()
     {
-        $databaseConnector = new DatabaseConnector();
-        $conn = $databaseConnector->getConnection();
-        assert($conn != null);
-        $statisticsTableName = $databaseConnector->getStatisticsTableName();
-        $identityProvidersMapTableName = $databaseConnector->getIdentityProvidersMapTableName();
-        $serviceProvidersMapTableName = $databaseConnector->getServiceProvidersMapTableName();
+        $this->databaseConnector = new DatabaseConnector();
+        $this->conn = $this->databaseConnector->getConnection();
+        assert($this->conn != null);
+        $this->statisticsTableName = $this->databaseConnector->getStatisticsTableName();
+        $this->identityProvidersMapTableName = $this->databaseConnector->getIdentityProvidersMapTableName();
+        $this->serviceProvidersMapTableName = $this->databaseConnector->getServiceProvidersMapTableName();
+    }
 
-        if (!in_array($databaseConnector->getMode(), ['PROXY', 'IDP', 'SP'])) {
+    public function __destruct()
+    {
+        $this->databaseConnector->closeConnection();
+    }
+
+    public function insertLogin(&$request, &$date)
+    {
+        if (!in_array($this->databaseConnector->getMode(), ['PROXY', 'IDP', 'SP'])) {
             throw new Exception('Unknown mode is set. Mode has to be one of the following: PROXY, IDP, SP.');
         }
-
-        if ($databaseConnector->getMode() !== 'IDP') {
+        if ($this->databaseConnector->getMode() !== 'IDP') {
             $idpName = $request['Attributes']['sourceIdPName'][0];
             $idpEntityID = $request['saml:sp:IdP'];
         }
-        if ($databaseConnector->getMode() !== 'SP') {
+        if ($this->databaseConnector->getMode() !== 'SP') {
             $spEntityId = $request['Destination']['entityid'];
             $spName = isset($request['Destination']['name']) ? $request['Destination']['name']['en'] : '';
         }
@@ -64,18 +76,18 @@ class DatabaseCommand
                 " is empty and login log wasn't inserted into the database."
             );
         } else {
-            $stmt = $conn->prepare(
-                "INSERT INTO " . $statisticsTableName . "(year, month, day, sourceIdp, service, count)" .
+            $stmt = $this->conn->prepare(
+                "INSERT INTO " . $this->statisticsTableName . "(year, month, day, sourceIdp, service, count)" .
                 " VALUES (?, ?, ?, ?, ?, '1') ON DUPLICATE KEY UPDATE count = count + 1"
             );
             $stmt->bind_param("iiiss", $year, $month, $day, $idpEntityID, $spEntityId);
             if ($stmt->execute() === false) {
-                Logger::error("The login log wasn't inserted into table: " . $statisticsTableName . ".");
+                Logger::error("The login log wasn't inserted into table: " . $this->statisticsTableName . ".");
             }
 
             if (!empty($idpName)) {
                 $stmt->prepare(
-                    "INSERT INTO " . $identityProvidersMapTableName .
+                    "INSERT INTO " . $this->identityProvidersMapTableName .
                     "(entityId, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = ?"
                 );
                 $stmt->bind_param("sss", $idpEntityID, $idpName, $idpName);
@@ -84,7 +96,7 @@ class DatabaseCommand
 
             if (!empty($spName)) {
                 $stmt->prepare(
-                    "INSERT INTO " . $serviceProvidersMapTableName .
+                    "INSERT INTO " . $this->serviceProvidersMapTableName .
                     "(identifier, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = ?"
                 );
                 $stmt->bind_param("sss", $spEntityId, $spName, $spName);
@@ -98,198 +110,154 @@ class DatabaseCommand
         $conn->close();
     }
 
-    public static function getSpNameBySpIdentifier($identifier)
+    public function getSpNameBySpIdentifier($identifier)
     {
-        $databaseConnector = new DatabaseConnector();
-        $conn = $databaseConnector->getConnection();
-        $tableName = $databaseConnector->getServiceProvidersMapTableName();
-        assert($conn != null);
-        $stmt = $conn->prepare(
+        $stmt = $this->conn->prepare(
             "SELECT name " .
-            "FROM " . $tableName . " " .
+            "FROM " . $this->serviceProvidersMapTableName . " " .
             "WHERE identifier=?"
         );
         $stmt->bind_param('s', $identifier);
         $stmt->execute();
         $result = $stmt->get_result();
-        $conn->close();
         return $result->fetch_assoc()["name"];
     }
 
-    public static function getIdPNameByEntityId($idpEntityId)
+    public function getIdPNameByEntityId($idpEntityId)
     {
-        $databaseConnector = new DatabaseConnector();
-        $conn = $databaseConnector->getConnection();
-        $tableName = $databaseConnector->getIdentityProvidersMapTableName();
-        assert($conn != null);
-        $stmt = $conn->prepare(
+        $stmt = $this->conn->prepare(
             "SELECT name " .
-            "FROM " . $tableName . " " .
+            "FROM " . $this->identityProvidersMapTableName . " " .
             "WHERE entityId=?"
         );
         $stmt->bind_param('s', $idpEntityId);
         $stmt->execute();
         $result = $stmt->get_result();
-        $conn->close();
         return $result->fetch_assoc()["name"];
     }
 
-    public static function getLoginCountPerDay($days)
+    public function getLoginCountPerDay($days)
     {
-        $databaseConnector = new DatabaseConnector();
-        $conn = $databaseConnector->getConnection();
-        assert($conn != null);
-        $table_name = $databaseConnector->getStatisticsTableName();
         $query = "SELECT year, month, day, SUM(count) AS count " .
-                 "FROM " . $table_name . " " .
+                 "FROM " . $this->statisticsTableName . " " .
                  "WHERE service != '' ";
         $params = [];
         self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY year,month,day " .
                   "ORDER BY year ASC,month ASC,day ASC";
-        $stmt = $conn->prepare($query);
+        $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
         $result = $stmt->get_result();
         $r = $result->fetch_all(MYSQLI_ASSOC);
-        $conn->close();
         return $r;
     }
 
-    public static function getLoginCountPerDayForService($days, $spIdentifier)
+    public function getLoginCountPerDayForService($days, $spIdentifier)
     {
-        $databaseConnector = new DatabaseConnector();
-        $conn = $databaseConnector->getConnection();
-        assert($conn != null);
-        $table_name = $databaseConnector->getStatisticsTableName();
         $query = "SELECT year, month, day, SUM(count) AS count " .
-                 "FROM " . $table_name . " " .
+                 "FROM " . $this->statisticsTableName . " " .
                  "WHERE service=:service ";
         $params = [':service' => $spIdentifier];
         self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY year,month,day " .
                   "ORDER BY year ASC,month ASC,day ASC";
-        $stmt = $conn->prepare($query);
+        $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
         $result = $stmt->get_result();
         $r = $result->fetch_all(MYSQLI_ASSOC);
-        $conn->close();
         return $r;
     }
 
-    public static function getLoginCountPerDayForIdp($days, $idpIdentifier)
+    public function getLoginCountPerDayForIdp($days, $idpIdentifier)
     {
-        $databaseConnector = new DatabaseConnector();
-        $conn = $databaseConnector->getConnection();
-        assert($conn != null);
-        $table_name = $databaseConnector->getStatisticsTableName();
         $query = "SELECT year, month, day, SUM(count) AS count " .
-                 "FROM " . $table_name . " " .
+                 "FROM " . $this->statisticsTableName . " " .
                  "WHERE sourceIdP=:sourceIdP ";
         $params = [':sourceIdP'=>$idpIdentifier];
         self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY year,month,day " .
                   "ORDER BY year ASC,month ASC,day ASC";
-        $stmt = $conn->prepare($query);
+        $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
         $result = $stmt->get_result();
         $r = $result->fetch_all(MYSQLI_ASSOC);
-        $conn->close();
         return $r;
     }
 
-    public static function getAccessCountPerService($days)
+    public function getAccessCountPerService($days)
     {
-        $databaseConnector = new DatabaseConnector();
-        $conn = $databaseConnector->getConnection();
-        assert($conn != null);
-        $table_name = $databaseConnector->getStatisticsTableName();
-        $serviceProvidersMapTableName = $databaseConnector->getServiceProvidersMapTableName();
         $query = "SELECT IFNULL(name,service) AS spName, service, SUM(count) AS count " .
-                 "FROM " . $serviceProvidersMapTableName . " " .
-                 "LEFT OUTER JOIN " . $table_name . " ON service = identifier ";
+                 "FROM " . $this->serviceProvidersMapTableName . " " .
+                 "LEFT OUTER JOIN " . $this->statisticsTableName . " ON service = identifier ";
         $params = [];
         self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY service HAVING service != '' " .
                   "ORDER BY count DESC";
-        $stmt = $conn->prepare($query);
+        $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
         $result = $stmt->get_result();
         $r = $result->fetch_all(MYSQLI_NUM);
-        $conn->close();
         return $r;
     }
 
-    public static function getAccessCountForServicePerIdentityProviders($days, $spIdentifier)
+    public function getAccessCountForServicePerIdentityProviders($days, $spIdentifier)
     {
-        $databaseConnector = new DatabaseConnector();
-        $conn = $databaseConnector->getConnection();
-        assert($conn != null);
-        $table_name = $databaseConnector->getStatisticsTableName();
-        $identityProvidersMapTableName = $databaseConnector->getIdentityProvidersMapTableName();
         $query = "SELECT IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
-                 "FROM " . $identityProvidersMapTableName . " " .
-                 "LEFT OUTER JOIN " . $table_name . " ON sourceIdp = entityId ";
+                 "FROM " . $this->identityProvidersMapTableName . " " .
+                 "LEFT OUTER JOIN " . $this->statisticsTableName . " ON sourceIdp = entityId ";
         $params = [':service' => $spIdentifier];
         self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service=:service " .
                   "ORDER BY count DESC";
-        $stmt = $conn->prepare($query);
+        $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
         $result = $stmt->get_result();
         $r = $result->fetch_all(MYSQLI_NUM);
-        $conn->close();
         return $r;
     }
 
-    public static function getAccessCountForIdentityProviderPerServiceProviders($days, $idpEntityId)
+    public function getAccessCountForIdentityProviderPerServiceProviders($days, $idpEntityId)
     {
-        $databaseConnector = new DatabaseConnector();
-        $conn = $databaseConnector->getConnection();
-        assert($conn != null);
-        $table_name = $databaseConnector->getStatisticsTableName();
-        $serviceProvidersMapTableName = $databaseConnector->getServiceProvidersMapTableName();
         $query = "SELECT IFNULL(name,service) AS spName, SUM(count) AS count " .
-                 "FROM " . $serviceProvidersMapTableName . " " .
-                 "LEFT OUTER JOIN " . $table_name . " ON service = identifier ";
+                 "FROM " . $this->serviceProvidersMapTableName . " " .
+                 "LEFT OUTER JOIN " . $this->statisticsTableName . " ON service = identifier ";
         $params = [':sourceIdp'=>$idpEntityId];
         self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp=:sourceIdp " .
                   "ORDER BY count DESC";
-        $stmt = $conn->prepare($query);
+        $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
         $result = $stmt->get_result();
         $r = $result->fetch_all(MYSQLI_NUM);
-        $conn->close();
         return $r;
     }
 
-    public static function getLoginCountPerIdp($days)
+    public function getLoginCountPerIdp($days)
     {
-        $databaseConnector = new DatabaseConnector();
-        $conn = $databaseConnector->getConnection();
-        assert($conn != null);
-        $tableName = $databaseConnector->getStatisticsTableName();
-        $identityProvidersMapTableName = $databaseConnector->getIdentityProvidersMapTableName();
         $query = "SELECT IFNULL(name,sourceIdp) AS idpName, sourceIdp, SUM(count) AS count " .
-                 "FROM " . $identityProvidersMapTableName . " " .
-                 "LEFT OUTER JOIN " . $tableName . " ON sourceIdp = entityId ";
+                 "FROM " . $this->identityProvidersMapTableName . " " .
+                 "LEFT OUTER JOIN " . $this->statisticsTableName . " ON sourceIdp = entityId ";
         $params = [];
         self::addDaysRange($days, $query, $params);
         $query .= "GROUP BY sourceIdp HAVING sourceIdp != '' " .
                   "ORDER BY count DESC";
-        $stmt = $conn->prepare($query);
+        $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
         $result = $stmt->get_result();
         $r = $result->fetch_all(MYSQLI_NUM);
-        $conn->close();
         return $r;
     }
 
     private static addDaysRange($days, &$query, &$params) {
-        if ($days != 0) {    // 0 = all time
-            $query .= "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
-                      "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
-            $params[':days'] = $days;
+    if ($days != 0) {    // 0 = all time
+        if (stripos($query, "WHERE") === false) {
+            $query .= "WHERE";
+        } else {
+            $query .= "AND";
         }
+        $query .= " CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
+                  "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
+        $params[':days'] = $days;
+    }
     }
 }

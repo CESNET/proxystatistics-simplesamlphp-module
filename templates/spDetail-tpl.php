@@ -16,15 +16,14 @@ $spIdentifier = $this->data['identifier'];
 require_once 'charts.include.php';
 require_once 'functions.include.php';
 
+$dbCmd = new DatabaseCommand();
 $this->data['head'] .= '<meta name="loginCountPerDay" id="loginCountPerDay" content="' .
-    htmlspecialchars(json_encode(
-        DatabaseCommand::getLoginCountPerDayForService($lastDays, $spIdentifier),
-        JSON_NUMERIC_CHECK
-    )) . '">';
+    htmlspecialchars(json_encode($dbCmd->getLoginCountPerDayForService($lastDays, $spIdentifier), JSON_NUMERIC_CHECK))
+    . '">';
 $this->data['head'] .=
     '<meta name="accessCountForServicePerIdentityProviders" id="accessCountForServicePerIdentityProviders" content="' .
     htmlspecialchars(json_encode(
-        DatabaseCommand::getAccessCountForServicePerIdentityProviders($lastDays, $spIdentifier),
+        $dbCmd->getAccessCountForServicePerIdentityProviders($lastDays, $spIdentifier),
         JSON_NUMERIC_CHECK
     )) . '">';
 $this->data['head'] .= '<meta name="translations" id="translations" content="'.htmlspecialchars(json_encode([
@@ -33,7 +32,7 @@ $this->data['head'] .= '<meta name="translations" id="translations" content="'.h
     'count' => $this->t('{proxystatistics:Proxystatistics:templates/count}'),
 ])).'">';
 
-$spName = DatabaseCommand::getSpNameBySpIdentifier($spIdentifier);
+$spName = $dbCmd->getSpNameBySpIdentifier($spIdentifier);
 
 if (!empty($spName)) {
     $this->data['header'] = $this->t('{proxystatistics:Proxystatistics:templates/spDetail_header_name}') .

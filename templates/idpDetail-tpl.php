@@ -16,16 +16,15 @@ $idpEntityId = $this->data['entityId'];
 require_once 'charts.include.php';
 require_once 'functions.include.php';
 
+$dbCmd = new DatabaseCommand();
 $this->data['head'] .= '<meta name="loginCountPerDay" id="loginCountPerDay" content="' .
-    htmlspecialchars(json_encode(
-        DatabaseCommand::getLoginCountPerDayForIdp($lastDays, $idpEntityId),
-        JSON_NUMERIC_CHECK
-    )) . '">';
+    htmlspecialchars(json_encode($dbCmd->getLoginCountPerDayForIdp($lastDays, $idpEntityId), JSON_NUMERIC_CHECK))
+    . '">';
 $this->data['head'] .=
     '<meta name="accessCountForIdentityProviderPerServiceProviders" ' .
     'id="accessCountForIdentityProviderPerServiceProviders" content="' .
     htmlspecialchars(json_encode(
-        DatabaseCommand::getAccessCountForIdentityProviderPerServiceProviders($lastDays, $idpEntityId),
+        $dbCmd->getAccessCountForIdentityProviderPerServiceProviders($lastDays, $idpEntityId),
         JSON_NUMERIC_CHECK
     )).'">';
 $this->data['head'] .= '<meta name="translations" id="translations" content="'.htmlspecialchars(json_encode([
@@ -34,7 +33,7 @@ $this->data['head'] .= '<meta name="translations" id="translations" content="'.h
     'count' => $this->t('{proxystatistics:Proxystatistics:templates/count}'),
 ])).'">';
 
-$idpName = DatabaseCommand::getIdPNameByEntityId($idpEntityId);
+$idpName = $dbCmd->getIdPNameByEntityId($idpEntityId);
 
 if (!empty($idpName)) {
     $this->data['header'] = $this->t('{proxystatistics:Proxystatistics:templates/idpDetail_header_name}') . $idpName;
