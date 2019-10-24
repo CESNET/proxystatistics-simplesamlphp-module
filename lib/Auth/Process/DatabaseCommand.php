@@ -211,16 +211,17 @@ class DatabaseCommand
         return $this->conn->read($query, $params)->fetchAll(PDO::FETCH_NUM);
     }
 
-    private static function addDaysRange($days, &$query, &$params) {
-    if ($days != 0) {    // 0 = all time
-        if (stripos($query, "WHERE") === false) {
-            $query .= "WHERE";
-        } else {
-            $query .= "AND";
-        }
-        $query .= " CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
+    private static function addDaysRange($days, &$query, &$params)
+    {
+        if ($days != 0) {    // 0 = all time
+            if (stripos($query, "WHERE") === false) {
+                $query .= "WHERE";
+            } else {
+                $query .= "AND";
+            }
+            $query .= " CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
                   "BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ";
-        $params['days'] = $days;
-    }
+            $params['days'] = $days;
+        }
     }
 }
