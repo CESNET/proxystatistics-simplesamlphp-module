@@ -245,16 +245,16 @@ class DatabaseCommand
         if ($days == 0) {    // 0 = all time
             $stmt = $conn->prepare(
                 "SELECT IFNULL(name,service) AS spName, service, SUM(count) AS count " .
-                "FROM " . $table_name . " " .
-                "LEFT OUTER JOIN " . $serviceProvidersMapTableName . " ON service = identifier " .
+                "FROM " . $serviceProvidersMapTableName . " " .
+                "LEFT OUTER JOIN " . $table_name . " ON service = identifier " .
                 "GROUP BY service HAVING service != '' " .
                 "ORDER BY count DESC"
             );
         } else {
             $stmt = $conn->prepare(
                 "SELECT IFNULL(name,service) AS spName, service, SUM(count) AS count " .
-                "FROM " . $table_name . " " .
-                "LEFT OUTER JOIN " . $serviceProvidersMapTableName . "  ON service = identifier " .
+                "FROM " . $serviceProvidersMapTableName . " " .
+                "LEFT OUTER JOIN " . $table_name . "  ON service = identifier " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
                 "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
                 "GROUP BY service HAVING service != '' " .
@@ -279,8 +279,8 @@ class DatabaseCommand
         if ($days == 0) {    // 0 = all time
             $stmt = $conn->prepare(
                 "SELECT IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
-                "FROM " . $table_name . " " .
-                "LEFT OUTER JOIN " . $identityProvidersMapTableName . " ON sourceIdp = entityId " .
+                "FROM " . $identityProvidersMapTableName . " " .
+                "LEFT OUTER JOIN " . $table_name . " ON sourceIdp = entityId " .
                 "GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service=? " .
                 "ORDER BY count DESC"
             );
@@ -288,8 +288,8 @@ class DatabaseCommand
         } else {
             $stmt = $conn->prepare(
                 "SELECT IFNULL(name,sourceIdp) AS idpName, SUM(count) AS count " .
-                "FROM " . $table_name . " " .
-                "LEFT OUTER JOIN " . $identityProvidersMapTableName . "  ON sourceIdp = entityId " .
+                "FROM " . $identityProvidersMapTableName . " " .
+                "LEFT OUTER JOIN " . $table_name . "  ON sourceIdp = entityId " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
                 "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
                 "GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service=? " .
@@ -314,8 +314,8 @@ class DatabaseCommand
         if ($days == 0) {    // 0 = all time
             $stmt = $conn->prepare(
                 "SELECT IFNULL(name,service) AS spName, SUM(count) AS count " .
-                "FROM " . $table_name . " " .
-                "LEFT OUTER JOIN " . $serviceProvidersMapTableName . " ON service = identifier " .
+                "FROM " . $serviceProvidersMapTableName . " " .
+                "LEFT OUTER JOIN " . $table_name . " ON service = identifier " .
                 "GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp=? " .
                 "ORDER BY count DESC"
             );
@@ -323,8 +323,8 @@ class DatabaseCommand
         } else {
             $stmt = $conn->prepare(
                 "SELECT IFNULL(name,service) AS spName, SUM(count) AS count " .
-                "FROM " . $table_name . " " .
-                "LEFT OUTER JOIN " . $serviceProvidersMapTableName . "  ON service = identifier " .
+                "FROM " . $serviceProvidersMapTableName . " " .
+                "LEFT OUTER JOIN " . $table_name . "  ON service = identifier " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
                 "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
                 "GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp=? " .
@@ -349,16 +349,16 @@ class DatabaseCommand
         if ($days == 0) {    // 0 = all time
             $stmt = $conn->prepare(
                 "SELECT IFNULL(name,sourceIdp) AS idpName, sourceIdp, SUM(count) AS count " .
-                "FROM " . $tableName . " " .
-                "LEFT OUTER JOIN " . $identityProvidersMapTableName . " ON sourceIdp = entityId " .
+                "FROM " . $identityProvidersMapTableName . " " .
+                "LEFT OUTER JOIN " . $tableName . " ON sourceIdp = entityId " .
                 "GROUP BY sourceIdp HAVING sourceIdp != '' " .
                 "ORDER BY count DESC"
             );
         } else {
             $stmt = $conn->prepare(
                 "SELECT IFNULL(name,sourceIdp) AS idpName, sourceIdp, SUM(count) AS count " .
-                "FROM " . $tableName . " " .
-                "LEFT OUTER JOIN " . $identityProvidersMapTableName . " ON sourceIdp = entityId " .
+                "FROM " . $identityProvidersMapTableName . " " .
+                "LEFT OUTER JOIN " . $tableName . " ON sourceIdp = entityId " .
                 "WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) " .
                 "BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() " .
                 "GROUP BY sourceIdp HAVING sourceIdp != '' " .
