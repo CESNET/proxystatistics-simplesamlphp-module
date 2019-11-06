@@ -15,6 +15,33 @@ $config = Configuration::getInstance();
 $session = Session::getSessionFromRequest();
 
 $configStatisticsproxy = Configuration::getConfig(CONFIG_FILE_NAME_STATISTICSPROXY);
+
+$authSource = $configStatisticsproxy->getString('requireAuth.source', '');
+if ($authSource) {
+    $as = new \SimpleSAML\Auth\Simple($authSource);
+    $as->requireAuth();
+    $attributes = $as->getAttributes();
+    $authAttributes = $configStatisticsproxy->getArray('requireAuth.attributes', []);
+    if ($authAttributes) {
+        foreach ($authAttributes as $attribute => $values) {
+            if (!isset($attributes[$attribute])) {
+                throw new \SimpleSAML\Error\Error('NOACCESS');
+            }
+            $currentValues = $attributes[$attribute];
+            if (
+                is_array($values[0]) && !array_reduce($values, function ($res, $value) use ($currentValues) {
+                    return $res || empty(array_diff($value, $currentValues));
+                }, false)
+            ) {
+                throw new \SimpleSAML\Error\Error('NOACCESS');
+            }
+            if (!is_array($values[0]) && empty(array_intersect($currentValues, $values))) {
+                throw new \SimpleSAML\Error\Error('NOACCESS');
+            }
+        }
+    }
+}
+
 $mode = $configStatisticsproxy->getString(MODE, 'PROXY');
 
 $t = new Template($config, 'proxystatistics:statistics-tpl.php');
