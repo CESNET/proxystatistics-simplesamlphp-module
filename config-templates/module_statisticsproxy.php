@@ -97,4 +97,10 @@ $config = [
      * Fill the table name for serviceProviders
      */
     'serviceProvidersMapTableName' => 'serviceProvidersMap',
+
+    /**
+     * Authentication source name if authentication should be required.
+     * Defaults to empty string.
+     */
+    //'requireAuth.source' => 'default-sp',
 ];
