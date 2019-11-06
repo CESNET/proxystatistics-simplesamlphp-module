@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+#### Added
+- Added possibility to show statistics only after authentication
+
 #### Changed
 - Remove unnecessary is_null()
 - Use SimpleSAML\Database
