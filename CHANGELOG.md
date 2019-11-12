@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 #### Changed
 - Remove unnecessary is_null()
+- Use SimpleSAML\Database
 
 #### Fixed
 - Log info message about successful authentication only after successful authentication to SP
@@ -12,6 +13,9 @@ All notable changes to this project will be documented in this file.
     - describe setup for modes PROXY/SP/IDP
     - change array notation from `array()` to `[]`
 - Read spName from $request only if present
+- Remove unused indexes
+- Optimize left outer join
+- Don't double queries w/o days
 
 ## [v3.1.0]
 #### Added

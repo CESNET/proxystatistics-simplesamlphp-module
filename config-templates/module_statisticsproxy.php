@@ -46,6 +46,23 @@ $config = [
         'database.dsn' => 'mysql:host=localhost;port=3306;dbname=STATS;charset=utf8',
         'database.username' => 'stats',
         'database.password' => 'stats',
+
+        /**
+         * Configuration for SSL
+         * If you want to use SSL you must filled this value and uncomment block of code
+         */
+        /*
+        'database.driver_options' => [
+            // Path for the ssl key file
+            PDO::MYSQL_ATTR_SSL_KEY => '',
+            // Path for the ssl cert file
+            PDO::MYSQL_ATTR_SSL_CERT => '',
+            // Path for the ssl ca file
+            PDO::MYSQL_ATTR_SSL_CA => '',
+            // Path for the ssl ca dir
+            PDO::MYSQL_ATTR_SSL_CAPATH => '',
+        ],
+        */
     ],
 
     /*

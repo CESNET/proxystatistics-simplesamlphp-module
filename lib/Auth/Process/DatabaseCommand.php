@@ -41,25 +41,12 @@ class DatabaseCommand
             $spName = isset($request['Destination']['name']) ? $request['Destination']['name']['en'] : '';
         }
 
-        if (!in_array($databaseConnector->getMode(), ['PROXY', 'IDP', 'SP'])) {
-            throw new Exception('Unknown mode is set. Mode has to be one of the following: PROXY, IDP, SP.');
-        }
-
-        if ($databaseConnector->getMode() !== 'IDP') {
-            $idpName = $request['Attributes']['sourceIdPName'][0];
-            $idpEntityID = $request['saml:sp:IdP'];
-        }
-        if ($databaseConnector->getMode() !== 'SP') {
-            $spEntityId = $request['Destination']['entityid'];
-            $spName = isset($request['Destination']['name']) ? $request['Destination']['name']['en'] : '';
-        }
-
-        if ($databaseConnector->getMode() === 'IDP') {
-            $idpName = $databaseConnector->getIdpName();
-            $idpEntityID = $databaseConnector->getIdpEntityId();
-        } elseif ($databaseConnector->getMode() === 'SP') {
-            $spEntityId = $databaseConnector->getSpEntityId();
-            $spName = $databaseConnector->getSpName();
+        if ($this->databaseConnector->getMode() === 'IDP') {
+            $idpName = $$this->databaseConnector->getIdpName();
+            $idpEntityID = $$this->databaseConnector->getIdpEntityId();
+        } elseif ($this->databaseConnector->getMode() === 'SP') {
+            $spEntityId = $$this->databaseConnector->getSpEntityId();
+            $spName = $$this->databaseConnector->getSpName();
         }
 
         $year = $date->format('Y');
@@ -97,7 +84,6 @@ class DatabaseCommand
             }
         }
 
-        $conn->close();
     }
 
     public function getSpNameBySpIdentifier($identifier)
