@@ -42,24 +42,20 @@ $t->data['tab'] = filter_input(
     ['options'=>['default'=>0,'min_range'=>1]]
 );
 
-if ($mode === 'IDP') {
-    $t->data['tabsAttributes'] = [
-        'PROXY' => 'id="tab-1" href="summary.php?lastDays=' . $lastDays . '"',
-        'IDP' => 'class="hidden" id="tab-2" href="identityProviders.php?lastDays=' . $lastDays . '"',
-        'SP' => 'id="tab-3" href="serviceProviders.php?lastDays=' . $lastDays . '"',
-    ];
-} elseif ($mode === 'SP') {
-    $t->data['tabsAttributes'] = [
-        'PROXY' => 'id="tab-1" href="summary.php?lastDays=' . $lastDays . '"',
-        'IDP' => 'id="tab-2" href="identityProviders.php?lastDays=' . $lastDays . '"',
-        'SP' => 'class="hidden" id="tab-3" href="serviceProviders.php?lastDays=' . $lastDays . '"',
-    ];
-} elseif ($mode === 'PROXY') {
-    $t->data['tabsAttributes'] = [
-        'PROXY' => 'id="tab-1" href="summary.php?lastDays=' . $lastDays . '"',
-        'IDP' => 'id="tab-2" href="identityProviders.php?lastDays=' . $lastDays . '"',
-        'SP' => 'id="tab-3" href="serviceProviders.php?lastDays=' . $lastDays . '"',
-    ];
+$t->data['tabsAttributes'] = [];
+$tabs = [
+    1 => ['tag' => 'PROXY', 'page' => 'summary.php', 'hidden' => false],
+    ['tag' => 'IDP', 'page' => 'identityProviders.php', 'hidden' => $mode === 'IDP'],
+    ['tag' => 'SP', 'page' => 'serviceProviders.php', 'hidden' => $mode === 'SP'],
+];
+foreach ($tabs as $i => $tab) {
+    $t->data['tabsAttributes'][$tab['tag']] = sprintf(
+        '%sid="tab-%d" href="%s?lastDays=%d"',
+        $tab['hidden'] ? 'class="hidden" ' : '',
+        $i,
+        $tab['page'],
+        $lastDays
+    );
 }
 
 $t->show();
