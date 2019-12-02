@@ -261,10 +261,10 @@ function drawPieChart(colNames, dataName, viewCols, url, getEl) {
 }
 
 var drawIdpsChart = drawPieChart.bind(null, ['sourceIdpName', 'sourceIdPEntityId', 'Count'], 'loginCountPerIdp',
-  [0, 2], 'idpDetail.php?entityId=');
+  [0, 2], getStatisticsData('module_url_base') + 'idpDetail.php?entityId=');
 
 var drawSpsChart = drawPieChart.bind(null, ['service', 'serviceIdentifier', 'Count'], 'accessCountPerService',
-  [0, 2], 'spDetail.php?identifier=');
+  [0, 2], getStatisticsData('module_url_base') + 'spDetail.php?identifier=');
 
 function drawCountTable(cols, dataCol, countCol, dataName, allowHTML, url, getEl) {
   var el = getEl();
@@ -323,7 +323,7 @@ function drawCountTable(cols, dataCol, countCol, dataName, allowHTML, url, getEl
 }
 
 var drawIdpsTable = drawCountTable.bind(null, ['tables_identity_provider', 'count'], 0, 2,
-  'loginCountPerIdp', false, 'idpDetail.php?entityId=');
+  'loginCountPerIdp', false, getStatisticsData('module_url_base') + 'idpDetail.php?entityId=');
 
 var drawAccessedSpsChart = drawPieChart.bind(null, ['service', 'Count'],
   'accessCountForIdentityProviderPerServiceProviders', null, null);
@@ -332,7 +332,7 @@ var drawAccessedSpsTable = drawCountTable.bind(null, ['tables_service_provider',
   'accessCountForIdentityProviderPerServiceProviders', true, null);
 
 var drawSpsTable = drawCountTable.bind(null, ['tables_service_provider', 'count'], 0, 2,
-  'accessCountPerService', true, 'spDetail.php?identifier=');
+  'accessCountPerService', true, getStatisticsData('module_url_base') + 'spDetail.php?identifier=');
 
 var drawUsedIdpsChart = drawPieChart.bind(null, ['service', 'Count'],
   'accessCountForServicePerIdentityProviders', null, null);

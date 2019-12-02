@@ -1,11 +1,12 @@
 <?php
 
-use SimpleSAML\Module\proxystatistics\Auth\Process\DatabaseCommand;
-use SimpleSAML\Module;
-
 /**
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
  */
+
+use SimpleSAML\Module\proxystatistics\Auth\Process\DatabaseCommand;
+use SimpleSAML\Module;
+use SimpleSAML\Module\proxystatistics\Utils;
 
 const CONFIG_FILE_NAME = 'config.php';
 const INSTANCE_NAME = 'instance_name';
@@ -26,12 +27,13 @@ $this->data['head'] .=
     htmlspecialchars(json_encode(
         $dbCmd->getAccessCountForIdentityProviderPerServiceProviders($lastDays, $idpEntityId),
         JSON_NUMERIC_CHECK
-    )).'">';
-$this->data['head'] .= '<meta name="translations" id="translations" content="'.htmlspecialchars(json_encode([
+    )) . '">';
+$this->data['head'] .= '<meta name="translations" id="translations" content="' . htmlspecialchars(json_encode([
     'tables_identity_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_identity_provider}'),
     'tables_service_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_service_provider}'),
     'count' => $this->t('{proxystatistics:Proxystatistics:templates/count}'),
-])).'">';
+])) . '">';
+$this->data['head'] .= Utils::getModuleUrlBaseMeta();
 
 $idpName = $dbCmd->getIdPNameByEntityId($idpEntityId);
 

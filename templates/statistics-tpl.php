@@ -1,14 +1,15 @@
 <?php
 
-use SimpleSAML\Configuration;
-use SimpleSAML\Module;
-use SimpleSAML\Logger;
-use SimpleSAML\Module\proxystatistics\Auth\Process\DatabaseCommand;
-
 /**
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
  * @author Dominik Baránek <0Baranek.dominik0@gmail.com>
  */
+
+use SimpleSAML\Configuration;
+use SimpleSAML\Module;
+use SimpleSAML\Logger;
+use SimpleSAML\Module\proxystatistics\Auth\Process\DatabaseCommand;
+use SimpleSAML\Module\proxystatistics\Utils;
 
 const CONFIG_FILE_NAME = 'config.php';
 const INSTANCE_NAME = 'instance_name';
@@ -42,12 +43,13 @@ $this->data['head'] .= '<meta name="loginCountPerIdp" id="loginCountPerIdp" cont
 $this->data['head'] .= '<meta name="accessCountPerService" id="accessCountPerService" content="' .
     htmlspecialchars(json_encode($dbCmd->getAccessCountPerService($this->data['lastDays']), JSON_NUMERIC_CHECK))
     . '">';
-$this->data['head'] .= '<meta name="translations" id="translations" content="'.htmlspecialchars(json_encode([
+$this->data['head'] .= '<meta name="translations" id="translations" content="' . htmlspecialchars(json_encode([
     'tables_identity_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_identity_provider}'),
     'tables_service_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_service_provider}'),
     'count' => $this->t('{proxystatistics:Proxystatistics:templates/count}'),
     'other' => $this->t('{proxystatistics:Proxystatistics:templates/other}'),
-])).'">';
+])) . '">';
+$this->data['head'] .= Utils::getModuleUrlBaseMeta();
 $this->includeAtTemplateBase('includes/header.php');
 ?>
 

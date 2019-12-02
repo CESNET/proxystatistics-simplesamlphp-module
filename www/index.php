@@ -1,6 +1,7 @@
 <?php
 
 use SimpleSAML\Configuration;
+use SimpleSAML\Module;
 use SimpleSAML\Session;
 use SimpleSAML\XHTML\Template;
 
@@ -53,7 +54,7 @@ foreach ($tabs as $i => $tab) {
         '%sid="tab-%d" href="%s?lastDays=%d"',
         $tab['hidden'] ? 'class="hidden" ' : '',
         $i,
-        $tab['page'],
+        Module::getModuleURL('proxystatistics/' . $tab['page']),
         $lastDays
     );
 }
