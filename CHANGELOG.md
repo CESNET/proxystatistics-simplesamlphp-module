@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 
 #### Removed
 - `detailedDays` config option
+- compatibility for deprecated database config options
 
 
 ## [v3.2.1]
