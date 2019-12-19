@@ -65,38 +65,22 @@ $config = [
         */
     ],
 
-    /*
-     * For how many days should detailed statistics (per user) be kept.
-     * @default 0
-     */
-    'detailedDays' => 0,
-
     /**
      * Which attribute should be used as user ID.
      * @default uid
      */
     'userIdAttribute' => 'uid',
 
-    /*
-     * Table name for statistics
+    /**
+     * Database table names.
+     * Default is to keep the name (as in `tables.sql`)
      */
-    'statisticsTableName' => 'statisticsTableName',
-
-    /*
-     * Table name for detailed statistics
-     * @default
-     */
-    'detailedStatisticsTableName' => 'statistics_detail',
-
-    /*
-     * Table name for identityProvidersMap
-     */
-    'identityProvidersMapTableName' => 'identityProvidersMap',
-
-    /*
-     * Table name for serviceProviders
-     */
-    'serviceProvidersMapTableName' => 'serviceProvidersMap',
+    'tableNames' => [
+        //'statistics_sums' => 'statistics_sums',
+        //'statistics_per_user' => 'statistics_per_user',
+        //'statistics_idp' => 'statistics_idp',
+        //'statistics_sp' => 'statistics_sp',
+    ],
 
     /**
      * Authentication source name if authentication should be required.

@@ -3,6 +3,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v4.0.0]
+#### Added
+- aggregated statistics (logins and unique users)
+
+#### Changed
+- new database tables
+- config options for table names replaced with one (optional) option `tableNames`
+
+#### Removed
+- `detailedDays` config option
+
+
 ## [v3.2.1]
 #### Fixed
 - Fixed the bug in using double '$'
