@@ -16,7 +16,7 @@ function proxystatistics_hook_cron(&$croninfo)
     \SimpleSAML\Logger::info('cron [proxystatistics]: Running cron in cron tag ['.$croninfo['tag'].'] ');
 
     try {
-        $dbCmd = new \SimpleSAML\Module\proxystatistics\Auth\Process\DatabaseCommand();
+        $dbCmd = new \SimpleSAML\Module\proxystatistics\DatabaseCommand();
         $dbCmd->deleteOldDetailedStatistics();
     } catch (\Exception $e) {
         $croninfo['summary'][] = 'Error during deleting old detailed statistics: '.$e->getMessage();

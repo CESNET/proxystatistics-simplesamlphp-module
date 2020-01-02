@@ -1,6 +1,6 @@
 <?php
 
-use SimpleSAML\Module\proxystatistics\Auth\Process\DatabaseCommand;
+use SimpleSAML\Module\proxystatistics\DatabaseCommand;
 use SimpleSAML\Module;
 
 /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace SimpleSAML\Module\proxystatistics\Auth\Process;
+namespace SimpleSAML\Module\proxystatistics;
 
 use SimpleSAML\Configuration;
 use SimpleSAML\Database;
