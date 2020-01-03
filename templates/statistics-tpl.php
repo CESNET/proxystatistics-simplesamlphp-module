@@ -1,8 +1,8 @@
 <?php
 
 use SimpleSAML\Configuration;
-use SimpleSAML\Module;
 use SimpleSAML\Logger;
+use SimpleSAML\Module;
 use SimpleSAML\Module\proxystatistics\DatabaseCommand;
 
 /**
@@ -15,7 +15,7 @@ const INSTANCE_NAME = 'instance_name';
 
 $config = Configuration::getConfig(CONFIG_FILE_NAME);
 $instanceName = $config->getString(INSTANCE_NAME, null);
-if (!is_null($instanceName)) {
+if ($instanceName !== null) {
     $this->data['header'] = $instanceName . ' ' .
         $this->t('{proxystatistics:Proxystatistics:templates/statistics_header}');
 } else {
@@ -34,24 +34,33 @@ if (!isset($this->data['tab'])) {
 }
 $dbCmd = new DatabaseCommand();
 $this->data['head'] .= '<meta name="loginCountPerDay" id="loginCountPerDay" content="' .
-    htmlspecialchars(json_encode($dbCmd->getLoginCountPerDay($this->data['lastDays']), JSON_NUMERIC_CHECK))
+    htmlspecialchars(json_encode(
+        $dbCmd->getLoginCountPerDay($this->data['lastDays'], ['spId' => '']),
+        JSON_NUMERIC_CHECK
+    ))
     . '">';
 $this->data['head'] .= '<meta name="loginCountPerIdp" id="loginCountPerIdp" content="' .
-    htmlspecialchars(json_encode($dbCmd->getLoginCountPerIdp($this->data['lastDays']), JSON_NUMERIC_CHECK))
+    htmlspecialchars(json_encode(
+        $dbCmd->getAccessCount(DatabaseCommand::TABLE_IDP, $this->data['lastDays'], ['idpId' => '']),
+        JSON_NUMERIC_CHECK
+    ))
     . '">';
 $this->data['head'] .= '<meta name="accessCountPerService" id="accessCountPerService" content="' .
-    htmlspecialchars(json_encode($dbCmd->getAccessCountPerService($this->data['lastDays']), JSON_NUMERIC_CHECK))
+    htmlspecialchars(json_encode(
+        $dbCmd->getAccessCount(DatabaseCommand::TABLE_SP, $this->data['lastDays'], ['spId' => '']),
+        JSON_NUMERIC_CHECK
+    ))
     . '">';
-$this->data['head'] .= '<meta name="translations" id="translations" content="'.htmlspecialchars(json_encode([
+$this->data['head'] .= '<meta name="translations" id="translations" content="' . htmlspecialchars(json_encode([
     'tables_identity_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_identity_provider}'),
     'tables_service_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_service_provider}'),
     'count' => $this->t('{proxystatistics:Proxystatistics:templates/count}'),
     'other' => $this->t('{proxystatistics:Proxystatistics:templates/other}'),
-])).'">';
+])) . '">';
 $this->includeAtTemplateBase('includes/header.php');
 ?>
 
-<div id="tabdiv" data-activetab="<?php echo htmlspecialchars($this->data['tab']);?>">
+<div id="tabdiv" data-activetab="<?php echo htmlspecialchars($this->data['tab']); ?>">
     <ul class="tabset_tabs" width="100px">
         <li>
             <a <?php echo $this->data['tabsAttributes']['PROXY'] ?>>

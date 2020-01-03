@@ -9,7 +9,7 @@ function getStatisticsData(name) {
 function getStatisticsDataYMDC(name) {
   return getStatisticsData(name).map(function mapItemToDate(item) {
     return {
-      t: new Date(item.year, item.month - 1, item.day),
+      t: new Date(item.day * 1000),
       y: item.count
     };
   });

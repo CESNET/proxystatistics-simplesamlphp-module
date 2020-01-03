@@ -39,10 +39,10 @@ CREATE TABLE `statistics_per_user` (
 # identity providers
 CREATE TABLE `statistics_idp` (
   `idpId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `entityId` VARCHAR(255) NOT NULL,
+  `identifier` VARCHAR(255) NOT NULL,
   `name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`idpId`),
-  UNIQUE KEY `entityId` (`entityId`)
+  UNIQUE KEY `identifier` (`identifier`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 # services

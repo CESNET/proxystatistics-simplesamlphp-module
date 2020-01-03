@@ -17,5 +17,9 @@
     "simplesamlphp/simplesamlphp": "~1.17",
     "ext-mysqli": "*",
     "ext-json": "*"
+  },
+  "require-dev": {
+    "symplify/easy-coding-standard": "^7.1",
+    "squizlabs/php_codesniffer": "*"
   }
 }

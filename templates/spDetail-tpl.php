@@ -1,7 +1,7 @@
 <?php
 
-use SimpleSAML\Module\proxystatistics\DatabaseCommand;
 use SimpleSAML\Module;
+use SimpleSAML\Module\proxystatistics\DatabaseCommand;
 
 /**
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
@@ -18,21 +18,21 @@ require_once 'functions.include.php';
 
 $dbCmd = new DatabaseCommand();
 $this->data['head'] .= '<meta name="loginCountPerDay" id="loginCountPerDay" content="' .
-    htmlspecialchars(json_encode($dbCmd->getLoginCountPerDayForService($lastDays, $spIdentifier), JSON_NUMERIC_CHECK))
+    htmlspecialchars(json_encode($dbCmd->getLoginCountPerDay($lastDays, ['spId' => $spIdentifier]), JSON_NUMERIC_CHECK))
     . '">';
 $this->data['head'] .=
     '<meta name="accessCountForServicePerIdentityProviders" id="accessCountForServicePerIdentityProviders" content="' .
     htmlspecialchars(json_encode(
-        $dbCmd->getAccessCountForServicePerIdentityProviders($lastDays, $spIdentifier),
+        $dbCmd->getAccessCount(DatabaseCommand::TABLE_IDP, $lastDays, ['spId' => $spIdentifier]),
         JSON_NUMERIC_CHECK
     )) . '">';
-$this->data['head'] .= '<meta name="translations" id="translations" content="'.htmlspecialchars(json_encode([
+$this->data['head'] .= '<meta name="translations" id="translations" content="' . htmlspecialchars(json_encode([
     'tables_identity_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_identity_provider}'),
     'tables_service_provider' => $this->t('{proxystatistics:Proxystatistics:templates/tables_service_provider}'),
     'count' => $this->t('{proxystatistics:Proxystatistics:templates/count}'),
-])).'">';
+])) . '">';
 
-$spName = $dbCmd->getSpNameBySpIdentifier($spIdentifier);
+$spName = $dbCmd->getNameByIdentifier(DatabaseCommand::TABLE_SP, $spIdentifier);
 
 if (!empty($spName)) {
     $this->data['header'] = $this->t('{proxystatistics:Proxystatistics:templates/spDetail_header_name}') .
