@@ -13,18 +13,9 @@ use SimpleSAML\Logger;
  */
 class Statistics extends ProcessingFilter
 {
-    private $config;
-    private $reserved;
-
     public function __construct($config, $reserved)
     {
         parent::__construct($config, $reserved);
-
-        if (!isset($config['config'])) {
-            throw new Exception("missing mandatory configuration option 'config'");
-        }
-        $this->config = (array)$config['config'];
-        $this->reserved = (array)$reserved;
     }
 
     public function process(&$request)

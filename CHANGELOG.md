@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 #### Changed
 - new database tables
 - config options for table names replaced with one (optional) option `tableNames`
+- option 'config' for auth proc filter made optional
 
 #### Removed
 - `detailedDays` config option
