@@ -19,13 +19,13 @@ Once you have installed SimpleSAMLphp, installing this module is very simple. Fi
 4. Configure, according to mode
 * for mode PROXY, configure IdPAttribute filter from Perun module to get sourceIdPName from IdP metadata:  
 ```
-    XX => [
+    50 => [
             'class' => 'perun:IdPAttribute',
             'attrMap' => [
                     'name:en' => 'sourceIdPName',
             ],
     ],
-    // where XX is priority (for example 30, must not be used for other modules)
+    // where 50 is priority (for example, must not be used for other modules)
 ```
 * for mode IDP, configure `idpEntityId` and `idpName` in `module_statisticsproxy.php`
 ```
@@ -55,11 +55,11 @@ Once you have installed SimpleSAMLphp, installing this module is very simple. Fi
 ```
 5. Configure proxystatistic filter
 ```
-    XX => array(
-            'class' => 'proxystatistics:statistics',
+    50 => array(
+            'class' => 'proxystatistics:Statistics',
             'config' => [],
     ),                
-    // where XX is priority (for example 50, must not be used for other modules)
+    // where 50 is priority (for example, must not be used for other modules)
 ```
 6. Add to `config.php`:
 ```

@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - new database tables
 - config options for table names replaced with one (optional) option `tableNames`
 - option 'config' for auth proc filter made optional
+- auth proc filter renamed to Statistics (PascalCase)
 
 #### Removed
 - `detailedDays` config option

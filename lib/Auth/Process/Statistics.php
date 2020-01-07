@@ -4,11 +4,9 @@ namespace SimpleSAML\Module\proxystatistics\Auth\Process;
 
 use DateTime;
 use SimpleSAML\Auth\ProcessingFilter;
-use SimpleSAML\Error\Exception;
 use SimpleSAML\Logger;
 
 /**
- *
  * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
  */
 class Statistics extends ProcessingFilter
@@ -41,13 +39,11 @@ class Statistics extends ProcessingFilter
 
         if (isset($request['perun']['user'])) {
             $user = $request['perun']['user'];
-            Logger::notice('UserId: ' . $user->getId() . ', identity: ' .  $eduPersonUniqueId . ', service: '
+            Logger::notice('UserId: ' . $user->getId() . ', identity: ' . $eduPersonUniqueId . ', service: '
                 . $spEntityId . ', external identity: ' . $sourceIdPEppn . ' from ' . $sourceIdPEntityId);
         } else {
-            Logger::notice('User identity: ' .  $eduPersonUniqueId . ', service: ' . $spEntityId .
+            Logger::notice('User identity: ' . $eduPersonUniqueId . ', service: ' . $spEntityId .
                 ', external identity: ' . $sourceIdPEppn . ' from ' . $sourceIdPEntityId);
         }
-
     }
-
 }
