@@ -1,0 +1,194 @@
+{
+  "summary": {
+    "en": "Summary",
+    "cs": "Shrnutí"
+  },
+  "sideIDPDetail": {
+    "en": "Identity providers detail",
+    "cs": "Detail poskytovatelů identity"
+  },
+  "sideSPDetail": {
+    "en": "Service providers detail",
+    "cs": "Detail služeb"
+  },
+  "select_time_range": {
+    "en": "Select the time range:",
+    "cs": "Vyberte časový interval:"
+  },
+  "time_range_all": {
+    "en": "All",
+    "cs": "Vše"
+  },
+  "time_range_week": {
+    "en": "Last 7 days",
+    "cs": "Posledních 7 dnů"
+  },
+  "time_range_month": {
+    "en": "Last 30 days",
+    "cs": "Posledních 30 dnů"
+  },
+  "time_range_year": {
+    "en": "Last year",
+    "cs": "Poslední rok"
+  },
+  "summary_overall_logins": {
+    "en": "Overall number of logins",
+    "cs": "Celkový počet přihlášení"
+  },
+  "summary_accessed_providers": {
+    "en": "Total number of accessed service providers",
+    "cs": "Celkový počet používaných služeb"
+  },
+  "summary_used_identity_providers": {
+    "en": "Total number of used identity providers",
+    "cs": "Celkový počet použitých poskytovatelů identit"
+  },
+  "summary_logins_today": {
+    "en": "Number of logins for today",
+    "cs": "Počet přihlášení během dnešního dne"
+  },
+  "summary_average_logins": {
+    "en": "Average number of logins per day",
+    "cs": "Průměrný počet přihlášení za den"
+  },
+  "summary_max_logins": {
+    "en": "Maximal number of logins per day",
+    "cs": "Maximální počet přihlášení za den"
+  },
+  "summary_name": {
+    "en": "Name",
+    "cs": "Jméno"
+  },
+  "count": {
+    "en": "Count",
+    "cs": "Počet"
+  },
+  "other": {
+    "en": "other",
+    "cs": "ostatní"
+  },
+  "graphs_logins": {
+    "en": "Number of logins",
+    "cs": "Počet přihlášení"
+  },
+  "side_IDPs": {
+    "en": "Identity providers",
+    "cs": "Poskytovatelé identit"
+  },
+  "side_IDP": {
+    "en": "Identity provider",
+    "cs": "Poskytovatel identity"
+  },
+  "side_SPs": {
+    "en": "Service providers",
+    "cs": "Poskytovatelé služeb"
+  },
+  "side_SP": {
+    "en": "Service provider",
+    "cs": "Služba"
+  },
+  "logins_day": {
+    "en": "Number of logins per day",
+    "cs": "Počet přihlášení za den"
+  },
+  "logins_IDP": {
+    "en": "Overall logins per identity provider",
+    "cs": "Počet přihlášení podle poskytovatele identity"
+  },
+  "logins_SP": {
+    "en": "Overall logins to service providers",
+    "cs": "Počet přihlášení ke službám"
+  },
+  "tables_date": {
+    "en": "Date",
+    "cs": "Datum"
+  },
+  "tables_month": {
+    "en": "Month",
+    "cs": "Měsíc"
+  },
+  "statistics_header": {
+    "en": "AAI Statistics",
+    "cs": "AAI Statistiky"
+  },
+  "chart_legend": {
+    "en": "The chart shows the number of logins !side_of in the selected time range. Click !side_on to view detailed statistics.",
+    "cs": "Graf ukazuje počet přihlášení !side_of ve zvoleném časovém rozmezí. Kliknutím na !side_on zobrazíte detailní statistiky."
+  },
+  "chart_legend_side_of_IDP": {
+    "en": "from each identity provider",
+    "cs": "od každého poskytovatele identity"
+  },
+  "chart_legend_side_of_SP": {
+    "en": "to each service provider",
+    "cs": "ke každé službě"
+  },
+  "chart_legend_side_on_IDP": {
+    "en": "an identity provider",
+    "cs": "poskytovatele identit"
+  },
+  "chart_legend_side_on_SP": {
+    "en": "a service",
+    "cs": "službu"
+  },
+  "first_access_only": {
+    "en": "Only first access to a service is counted, because following logins are not going through the !through_mode.",
+    "cs": "Počítá se pouze první přístup ke službě, protože další již nejdou přes !through_mode."
+  },
+  "through_mode_PROXY": {
+    "en": "proxy",
+    "cs": "proxy"
+  },
+  "through_mode_IDP": {
+    "en": "identity provider",
+    "cs": "poskytovatele identity"
+  },
+  "summary_logins_info": {
+    "en": "The chart shows overall number of logins from identity providers for each day.",
+    "cs": "Graf zobrazuje počet přihlášení za každý den."
+  },
+  "SPDetail_header_name": {
+    "en": "Detail statistics for Service Provider ",
+    "cs": "Podrobné statistiky služby "
+  },
+  "SPDetail_dashboard_header": {
+    "en": "Number of logins",
+    "cs": "Počet přihlášení"
+  },
+  "SPDetail_dashboard_legend": {
+    "en": "The chart shows number of logins to this service for each day.",
+    "cs": "Graf zobrazuje počet přihlášení k dané službě za každý den."
+  },
+  "SPDetail_graph_header": {
+    "en": "Used identity providers",
+    "cs": "Použití poskytovatelé identit"
+  },
+  "SPDetail_graph_legend": {
+    "en": "The chart and the table shows used identity providers to login to this service provider in selected time range. Only first access to the service is counted, following single sign-on accesses are not counted, because they are not going through the Proxy.",
+    "cs": "Graf s tabulkou ukazují použité poskytovatele identit pro přihlášení k této službě ve zvoleném časovém rozmezí. Počítá se pouze první přístup ke službě, protože další již nejdou přes Proxy."
+  },
+  "IDPDetail_header_name": {
+    "en": "Detail usage of Identity Provider ",
+    "cs": "Detail využití poskytovatele identit "
+  },
+  "IDPDetail_dashboard_header": {
+    "en": "Number of usage of identity provider",
+    "cs": "Počet přístupů skrze poskytovatele identit"
+  },
+  "IDPDetail_dashboard_legend": {
+    "en": "The chart shows number of logins using this identity provider for each day.",
+    "cs": "Graf zobrazuje počet přihlášení tímto poskytovatelem identit za každý den."
+  },
+  "IDPDetail_graph_header": {
+    "en": "Accessed service providers",
+    "cs": "Služby, ke kterým bylo přistupováno"
+  },
+  "IDPDetail_graph_legend": {
+    "en": "The chart and the table shows accessed service providers by this identity provider in selected time range. Only first access to the service is counted, following single sign-on accesses are not counted, because they are not going through the Proxy.",
+    "cs": "Graf s tabulkou ukazují služby, ke kterým bylo přistoupeno daným poskytovatelem identit ve zvoleném časovém rozmezí. Počítá se pouze první přístup ke službě, protože další již nejdou přes Proxy."
+  },
+  "back_to_stats": {
+    "en": "Back to overall statistics",
+    "cs": "Zpět na přehled celkových statistik"
+  }
+}

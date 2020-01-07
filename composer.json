@@ -19,7 +19,7 @@
     "ext-json": "*"
   },
   "require-dev": {
-    "symplify/easy-coding-standard": "^7.1",
-    "squizlabs/php_codesniffer": "*"
+    "squizlabs/php_codesniffer": "*",
+    "symplify/easy-coding-standard": "^7.2"
   }
 }

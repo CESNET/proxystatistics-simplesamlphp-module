@@ -5,5 +5,5 @@ parameters:
     skip:
         PhpCsFixer\Fixer\Operator\NotOperatorWithSuccessorSpaceFixer: ~
         SlevomatCodingStandard\Sniffs\Variables\UnusedVariableSniff.UnusedVariable:
-          - 'config-templates/module_statisticsproxy.php'
+          - 'config-templates/module_proxystatistics.php'
 services:

@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * Script for migrate statistics data from version < 1.6.x to version > 2.0.0
  *
  * You need firstly export the tables identityProviders and serviceProviders into two separate CSV files.
@@ -23,7 +22,7 @@ $serviceProvidersFileName = '';
 $resultFileName = '';
 
 if (empty($identityProvidersFileName) || empty($serviceProvidersFileName) || empty($resultFileName)) {
-    exit("One of required attributes is empty." . PHP_EOL);
+    exit('One of required attributes is empty.' . PHP_EOL);
 }
 
 $tableName = 'statistics';
@@ -32,11 +31,11 @@ $result = '';
 $line = null;
 
 // Identity providers part
-$file = fopen($identityProvidersFileName, "r");
+$file = fopen($identityProvidersFileName, 'r');
 
 while (!feof($file)) {
-    $line = (fgetcsv($file));
-    if ($line != null) {
+    $line = fgetcsv($file);
+    if ($line !== null) {
         $lineInsert = 'INSERT INTO ' . $tableName . '(year, month, day, sourceIdp, service, count) ' .
             'VALUES(' . $line[0] . ', ' . $line[1] . ', ' . $line[2] . ', "' . $line[3] . '","" , ' . $line[4] . ');' .
             PHP_EOL;
@@ -47,11 +46,11 @@ while (!feof($file)) {
 fclose($file);
 
 // Service providers part
-$file = fopen($serviceProvidersFileName, "r");
+$file = fopen($serviceProvidersFileName, 'r');
 
 while (!feof($file)) {
-    $line = (fgetcsv($file));
-    if ($line != null) {
+    $line = fgetcsv($file);
+    if ($line !== null) {
         $lineInsert = 'INSERT INTO ' . $tableName . '(year, month, day, sourceIdp, service, count) ' .
             'VALUES(' . $line[0] . ', ' . $line[1] . ', ' . $line[2] . ', "", "' . $line[3] . '", ' . $line[4] . ');' .
             PHP_EOL;

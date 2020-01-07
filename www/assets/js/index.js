@@ -167,7 +167,7 @@ function processDataForPieChart(data, viewCols) {
   return { data: processedData, other: othersFraction > 0, total: total };
 }
 
-function drawPieChart(colNames, dataName, viewCols, url, getEl) {
+function drawPieChart(dataName, viewCols, url, getEl) {
   var el = getEl();
   if (!el) return;
 
@@ -260,11 +260,9 @@ function drawPieChart(colNames, dataName, viewCols, url, getEl) {
   legendContainer.innerHTML = chart.generateLegend();
 }
 
-var drawIdpsChart = drawPieChart.bind(null, ['sourceIdpName', 'sourceIdPEntityId', 'Count'], 'loginCountPerIdp',
-  [0, 2], 'idpDetail.php?entityId=');
-
-var drawSpsChart = drawPieChart.bind(null, ['service', 'serviceIdentifier', 'Count'], 'accessCountPerService',
-  [0, 2], 'spDetail.php?identifier=');
+function getDrawChart(side) {
+  return drawPieChart.bind(null, 'loginCountPer' + side, [0, 2], 'detail.php?side=' + side + '&id=');
+}
 
 function drawCountTable(cols, dataCol, countCol, dataName, allowHTML, url, getEl) {
   var el = getEl();
@@ -322,23 +320,14 @@ function drawCountTable(cols, dataCol, countCol, dataName, allowHTML, url, getEl
   });
 }
 
-var drawIdpsTable = drawCountTable.bind(null, ['tables_identity_provider', 'count'], 0, 2,
-  'loginCountPerIdp', false, 'idpDetail.php?entityId=');
+function getDrawTable(side) {
+  return drawCountTable.bind(null, ['tables_' + side, 'count'], 0, 2, 'loginCountPer' + side, false,
+    'detail.php?side=' + side + '&id=');
+}
 
-var drawAccessedSpsChart = drawPieChart.bind(null, ['service', 'Count'],
-  'accessCountForIdentityProviderPerServiceProviders', null, null);
-
-var drawAccessedSpsTable = drawCountTable.bind(null, ['tables_service_provider', 'count'], 0, 1,
-  'accessCountForIdentityProviderPerServiceProviders', true, null);
-
-var drawSpsTable = drawCountTable.bind(null, ['tables_service_provider', 'count'], 0, 2,
-  'accessCountPerService', true, 'spDetail.php?identifier=');
-
-var drawUsedIdpsChart = drawPieChart.bind(null, ['service', 'Count'],
-  'accessCountForServicePerIdentityProviders', null, null);
-
-var drawUsedIdpsTable = drawCountTable.bind(null, ['tables_identity_provider', 'count'], 0, 1,
-  'accessCountForServicePerIdentityProviders', true, null);
+function getDrawCountTable(side) {
+  return drawCountTable.bind(null, ['tables_' + side, 'count'], 0, 2, 'accessCounts', true, null);
+}
 
 function getterLoadCallback(getEl, callback) {
   callback(getEl);
@@ -354,14 +343,13 @@ function idLoadCallback(id, callback) {
 
 function chartInit() {
   idLoadCallback('loginsDashboard', drawLoginsChart);
-  classLoadCallback('chart-idpsChart', drawIdpsChart);
-  classLoadCallback('chart-spsChart', drawSpsChart);
-  idLoadCallback('idpsTable', drawIdpsTable);
-  idLoadCallback('accessedSpsChartDetail', drawAccessedSpsChart);
-  idLoadCallback('accessedSpsTable', drawAccessedSpsTable);
-  idLoadCallback('spsTable', drawSpsTable);
-  idLoadCallback('usedIdPsChartDetail', drawUsedIdpsChart);
-  idLoadCallback('usedIdPsTable', drawUsedIdpsTable);
+  ['IDP', 'SP'].forEach(function callbacksForSide(side) {
+    classLoadCallback('chart-' + side + 'Chart', getDrawChart(side));
+    idLoadCallback(side + 'Table', getDrawTable(side));
+    idLoadCallback('detail' + side + 'Chart', drawPieChart.bind(null, 'accessCounts', [0, 2], null));
+    idLoadCallback('detail' + side + 'Table', getDrawCountTable(side));
+  });
+
   $('#dateSelector input[name=lastDays]').on('click', function submitForm() {
     this.form.submit();
   });
