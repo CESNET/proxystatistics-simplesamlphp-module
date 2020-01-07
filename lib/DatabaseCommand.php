@@ -10,43 +10,44 @@ use SimpleSAML\Logger;
  */
 class DatabaseCommand
 {
-    const CONFIG_FILE_NAME = 'module_statisticsproxy.php';
+    public const CONFIG_FILE_NAME = 'module_statisticsproxy.php';
 
-    const STORE = 'store';
+    private const STORE = 'store';
 
-    const MODE = 'mode';
+    private const MODE = 'mode';
 
-    const IDP_ENTITY_ID = 'idpEntityId';
+    private const IDP_ENTITY_ID = 'idpEntityId';
 
-    const IDP_NAME = 'idpName';
+    private const IDP_NAME = 'idpName';
 
-    const SP_ENTITY_ID = 'spEntityId';
+    private const SP_ENTITY_ID = 'spEntityId';
 
-    const SP_NAME = 'spName';
+    private const SP_NAME = 'spName';
 
-    const DETAILED_DAYS = 'detailedDays';
+    private const USER_ID_ATTRIBUTE = 'userIdAttribute';
 
-    const USER_ID_ATTRIBUTE = 'userIdAttribute';
+    private const TABLE_SUM = 'statistics_sums';
 
-    const TABLE_SUM = 'statistics_sums';
+    private const TABLE_PER_USER = 'statistics_per_user';
 
-    const TABLE_PER_USER = 'statistics_per_user';
+    private const TABLE_IDP = 'statistics_idp';
 
-    const TABLE_IDP = 'statistics_idp';
+    private const TABLE_SP = 'statistics_sp';
 
-    const TABLE_SP = 'statistics_sp';
-
-    const TABLE_IDS = ['idpId', 'spId'];
+    private const TABLE_IDS = [
+        self::TABLE_IDP => 'idpId',
+        self::TABLE_SP => 'spId',
+    ];
 
     private $config;
 
     private $conn = null;
 
     private $tables = [
-        TABLE_SUM => TABLE_SUM,
-        TABLE_PER_USER => TABLE_PER_USER,
-        TABLE_IDP => TABLE_IDP,
-        TABLE_SP => TABLE_SP,
+        self::TABLE_SUM => self::TABLE_SUM,
+        self::TABLE_PER_USER => self::TABLE_PER_USER,
+        self::TABLE_IDP => self::TABLE_IDP,
+        self::TABLE_SP => self::TABLE_SP,
     ];
 
     private $mode;
@@ -75,10 +76,12 @@ class DatabaseCommand
             $idAttribute = $this->config->getString(self::USER_ID_ATTRIBUTE, 'uid');
             $userId = isset($request['Attributes'][$idAttribute]) ? $request['Attributes'][$idAttribute][0] : '';
 
-            $idpId = $this->getIdFromIdentifier(TABLE_IDP, $entities['idp'], 'idpId');
-            $spId = $this->getIdFromIdentifier(TABLE_SP, $entities['sp'], 'spId');
+            $ids = [];
+            foreach (self::TABLE_IDS as $table => $tableId) {
+                $ids[$tableId] = $this->getIdFromIdentifier($table, $entities[$table], $tableId);
+            }
 
-            if ($this->writeLogin($date, $idpId, $spId, $userId) === false) {
+            if ($this->writeLogin($date, $ids, $userId) === false) {
                 Logger::error('The login log was not inserted.');
             }
         }
@@ -98,7 +101,7 @@ class DatabaseCommand
     {
         $params = [];
         $query = 'SELECT UNIX_TIMESTAMP(day) AS day, logins AS count ' .
-                 'FROM ' . $this->tables[TABLE_SUM] . ' ' .
+                 'FROM ' . $this->tables[self::TABLE_SUM] . ' ' .
                  'WHERE ';
         self::addWhereId($where, $query, $params);
         self::addDaysRange($days, $query, $params);
@@ -113,7 +116,7 @@ class DatabaseCommand
         $params = [];
         $query = 'SELECT IFNULL(name,identifier) AS name, identifier, logins AS count ' .
                  'FROM ' . $this->tables[$table] . ' ' .
-                 'LEFT OUTER JOIN ' . $this->tables[TABLE_SUM] . ' USING (idpId, spId) ' .
+                 'LEFT OUTER JOIN ' . $this->tables[self::TABLE_SUM] . ' USING (idpId, spId) ' .
                  'WHERE ';
         self::addWhereId($where, $query, $params);
         self::addDaysRange($days, $query, $params);
@@ -145,18 +148,16 @@ class DatabaseCommand
         $query .= ' ';
     }
 
-    private function writeLogin($date, $idpId, $spId, $user)
+    private function writeLogin($date, $ids, $user)
     {
-        $params = [
+        $params = array_merge($ids, [
             'day' => $date->format('Y-m-d'),
-            'idpId' => $idpId,
-            'spId' => $spId,
             'count' => 1,
             'user' => $user,
-        ];
+        ]);
         $fields = array_keys($params);
         $placeholders = array_map(['DatabaseCommand', 'prependColon'], $fields);
-        $query = 'INSERT INTO ' . $this->tables[TABLE_PER_USER] . ' (' . implode(', ', $fields) . ')' .
+        $query = 'INSERT INTO ' . $this->tables[self::TABLE_PER_USER] . ' (' . implode(', ', $fields) . ')' .
                  ' VALUES (' . implode(', ', $placeholders) . ') ON DUPLICATE KEY UPDATE count = count + 1';
 
         return $this->conn->write($query, $params);
@@ -165,24 +166,24 @@ class DatabaseCommand
     private function getEntities($request)
     {
         $entities = [
-            'idp' => [],
-            'sp' => [],
+            self::TABLE_IDP => [],
+            self::TABLE_SP => [],
         ];
-        if ($this->mode !== 'IDP') {
-            $entities['idp']['id'] = $request['saml:sp:IdP'];
-            $entities['idp']['name'] = $request['Attributes']['sourceIdPName'][0];
+        if ($this->mode !== self::TABLE_IDP) {
+            $entities[self::TABLE_IDP]['id'] = $request['saml:sp:IdP'];
+            $entities[self::TABLE_IDP]['name'] = $request['Attributes']['sourceIdPName'][0];
         }
-        if ($this->mode !== 'SP') {
-            $entities['sp']['id'] = $request['Destination']['entityid'];
-            $entities['sp']['name'] = $request['Destination']['name']['en'] ?? '';
+        if ($this->mode !== self::TABLE_SP) {
+            $entities[self::TABLE_SP]['id'] = $request['Destination']['entityid'];
+            $entities[self::TABLE_SP]['name'] = $request['Destination']['name']['en'] ?? '';
         }
 
-        if ($this->mode === 'IDP') {
-            $entities['idp']['id'] = $this->config->getString(self::IDP_ENTITY_ID, '');
-            $entities['idp']['name'] = $this->config->getString(self::IDP_NAME, '');
-        } elseif ($this->mode === 'SP') {
-            $entities['sp']['id'] = $this->config->getString(self::SP_ENTITY_ID, '');
-            $entities['sp']['name'] = $this->config->getString(self::SP_NAME, '');
+        if ($this->mode === self::TABLE_IDP) {
+            $entities[self::TABLE_IDP]['id'] = $this->config->getString(self::IDP_ENTITY_ID, '');
+            $entities[self::TABLE_IDP]['name'] = $this->config->getString(self::IDP_NAME, '');
+        } elseif ($this->mode === self::TABLE_SP) {
+            $entities[self::TABLE_SP]['id'] = $this->config->getString(self::SP_ENTITY_ID, '');
+            $entities[self::TABLE_SP]['name'] = $this->config->getString(self::SP_NAME, '');
         }
         return $entities;
     }
