@@ -122,7 +122,7 @@ class DatabaseCommand
         self::addWhereId($where, $query, $params);
         self::addDaysRange($days, $query, $params);
         $query .= 'GROUP BY ' . self::TABLE_IDS[$table] . ' ';
-        $query .= 'ORDER BY logins DESC';
+        $query .= 'ORDER BY SUM(logins) DESC';
 
         return $this->read($query, $params)->fetchAll(PDO::FETCH_NUM);
     }
