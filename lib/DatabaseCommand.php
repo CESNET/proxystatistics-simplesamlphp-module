@@ -129,15 +129,15 @@ class DatabaseCommand
 
     public function aggregate()
     {
-        foreach (['idpId', null] as $idpId) {
-            foreach (['spId', null] as $spId) {
+        foreach ([self::TABLE_IDS[self::TABLE_IDP], null] as $idpId) {
+            foreach ([self::TABLE_IDS[self::TABLE_SP], null] as $spId) {
                 $ids = [$idpId, $spId];
                 $msg = 'Aggregating daily statistics per ' . implode(' and ', array_filter($ids));
                 Logger::info($msg);
                 $query = 'INSERT INTO ' . $this->tables[self::TABLE_SUM] . ' '
                     . 'SELECT NULL, YEAR(`day`), MONTH(`day`), DAY(`day`), ';
                 foreach ($ids as $id) {
-                    $query .= ($id === null ? 'NULL' : $id) . ',';
+                    $query .= ($id === null ? '0' : $id) . ',';
                 }
                 $query .= 'SUM(logins), COUNT(DISTINCT user) '
                     . 'FROM ' . $this->tables[self::TABLE_PER_USER] . ' '
@@ -182,7 +182,7 @@ class DatabaseCommand
             $column = self::TABLE_IDS[$table];
             $part = $column;
             if ($value === null) {
-                $part .= ' IS NULL';
+                $part .= '=0';
             } else {
                 $part .= '=:id';
                 $params['id'] = $value;

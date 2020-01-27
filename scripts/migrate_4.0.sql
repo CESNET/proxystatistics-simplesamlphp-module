@@ -55,8 +55,8 @@ SELECT
   `count`
 FROM
   statistics_detail
-  LEFT JOIN statistics_idp ON statistics_detail.sourceIdp = statistics_idp.identifier
-  LEFT JOIN statistics_sp ON statistics_detail.service = statistics_sp.identifier
+  JOIN statistics_idp ON statistics_detail.sourceIdp = statistics_idp.identifier
+  JOIN statistics_sp ON statistics_detail.service = statistics_sp.identifier
 GROUP BY
   `year`,
   `month`,
@@ -89,7 +89,7 @@ SELECT
   YEAR(`day`),
   MONTH(`day`),
   DAY(`day`),
-  NULL,
+  0,
   spId,
   SUM(logins),
   COUNT(DISTINCT user) AS users
@@ -106,7 +106,7 @@ SELECT
   MONTH(`day`),
   DAY(`day`),
   idpId,
-  NULL,
+  0,
   SUM(logins),
   COUNT(DISTINCT user) AS users
 FROM
@@ -121,11 +121,97 @@ SELECT
   YEAR(`day`),
   MONTH(`day`),
   DAY(`day`),
-  NULL,
-  NULL,
+  0,
+  0,
   SUM(logins),
   COUNT(DISTINCT user) AS users
 FROM
   statistics_per_user
 GROUP BY
   `day`;
+
+
+# add older stats
+INSERT INTO statistics_sums
+SELECT
+  NULL,
+  `year`,
+  `month`,
+  `day`,
+  `idpId`,
+  `spId`,
+  `count`,
+  NULL
+FROM
+  statistics
+  JOIN statistics_idp ON statistics.sourceIdp = statistics_idp.identifier
+  JOIN statistics_sp ON statistics.service = statistics_sp.identifier
+GROUP BY
+  `year`,
+  `month`,
+  `day`,
+  `sourceIdp`,
+  `service`
+ON DUPLICATE KEY UPDATE id=id;
+
+INSERT INTO statistics_sums
+SELECT
+  NULL,
+  `year`,
+  `month`,
+  `day`,
+  0,
+  `spId`,
+  SUM(`count`),
+  NULL
+FROM
+  statistics
+  JOIN statistics_idp ON statistics.sourceIdp = statistics_idp.identifier
+  JOIN statistics_sp ON statistics.service = statistics_sp.identifier
+GROUP BY
+  `year`,
+  `month`,
+  `day`,
+  `service`
+ON DUPLICATE KEY UPDATE id=id;
+
+INSERT INTO statistics_sums
+SELECT
+  NULL,
+  `year`,
+  `month`,
+  `day`,
+  `idpId`,
+  0,
+  SUM(`count`),
+  NULL
+FROM
+  statistics
+  JOIN statistics_idp ON statistics.sourceIdp = statistics_idp.identifier
+  JOIN statistics_sp ON statistics.service = statistics_sp.identifier
+GROUP BY
+  `year`,
+  `month`,
+  `day`,
+  `sourceIdp`
+ON DUPLICATE KEY UPDATE id=id;
+
+INSERT INTO statistics_sums
+SELECT
+  NULL,
+  `year`,
+  `month`,
+  `day`,
+  0,
+  0,
+  SUM(`count`),
+  NULL
+FROM
+  statistics
+  JOIN statistics_idp ON statistics.sourceIdp = statistics_idp.identifier
+  JOIN statistics_sp ON statistics.service = statistics_sp.identifier
+GROUP BY
+  `year`,
+  `month`,
+  `day`
+ON DUPLICATE KEY UPDATE id=id;
