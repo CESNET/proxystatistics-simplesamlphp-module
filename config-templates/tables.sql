@@ -1,6 +1,6 @@
-# daily and monthly logins and unique users for all combinations of idp+sp
-# -> can be reduced depending on the mode (IdP mode does not need the combinations with IdP)
-# (could also include yearly numbers if statistics_per_user are kept for a year)
+-- daily and monthly logins and unique users for all combinations of idp+sp
+-- -> can be reduced depending on the mode (IdP mode does not need the combinations with IdP)
+-- (could also include yearly numbers if statistics_per_user are kept for a year)
 CREATE TABLE `statistics_sums` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `year` YEAR NOT NULL,
@@ -15,16 +15,16 @@ CREATE TABLE `statistics_sums` (
   KEY `idpId` (`idpId`),
   KEY `spId` (`spId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-# ROWS
-# each row contains daily users = COUNT(1) and daily logins = SUM(logins) from statistics_per_user
-# year, month, day,  idp,  sp    | daily per idp+sp
-# year, month, day,  NULL, sp    | daily per sp
-# year, month, day,  idp,  NULL  | daily per idp
-# year, month, day,  NULL, NULL  | daily (total)
-# year, month, NULL, -||-        | monthly -||-
+-- ROWS
+-- each row contains daily users = COUNT(1) and daily logins = SUM(logins) from statistics_per_user
+-- year, month, day,  idp,  sp    | daily per idp+sp
+-- year, month, day,  NULL, sp    | daily per sp
+-- year, month, day,  idp,  NULL  | daily per idp
+-- year, month, day,  NULL, NULL  | daily (total)
+-- year, month, NULL, -||-        | monthly -||-
 
-# daily logins per IdP+SP+user combination
-# data is being kept for ~1 month
+-- daily logins per IdP+SP+user combination
+-- data is being kept for ~1 month
 CREATE TABLE `statistics_per_user` (
   `day` date NOT NULL,
   `idpId` INT UNSIGNED NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE `statistics_per_user` (
   KEY `spId` (`spId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-# identity providers
+-- identity providers
 CREATE TABLE `statistics_idp` (
   `idpId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `identifier` VARCHAR(255) NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE `statistics_idp` (
   UNIQUE KEY `identifier` (`identifier`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-# services
+-- services
 CREATE TABLE `statistics_sp` (
   `spId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `identifier` VARCHAR(255) NOT NULL,
