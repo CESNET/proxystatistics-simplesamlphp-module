@@ -190,5 +190,13 @@
   "back_to_stats": {
     "en": "Back to overall statistics",
     "cs": "Zpět na přehled celkových statistik"
+  },
+  "of_logins": {
+    "en": "logins",
+    "cs": "přihlášení"
+  },
+  "of_users": {
+    "en": "users",
+    "cs": "uživatelů"
   }
 }

@@ -6,11 +6,11 @@ function getStatisticsData(name) {
   return $.parseJSON($('#' + name).attr('content'));
 }
 
-function getStatisticsDataYMDC(name) {
+function getStatisticsDataYMDC(name, field) {
   return getStatisticsData(name).map(function mapItemToDate(item) {
     return {
       t: new Date(item.day * 1000),
-      y: item.count
+      y: item[field]
     };
   });
 }
@@ -19,17 +19,7 @@ function getTranslation(str) {
   return $.parseJSON($('#translations').attr('content'))[str];
 }
 
-function drawLoginsChart(getEl) {
-  var el = getEl();
-  if (!el) return;
-
-  var ctx = el.getContext('2d');
-
-  var data = getStatisticsDataYMDC('loginCountPerDay');
-
-  var minX = data[0].t;
-  var maxX = data[data.length - 1].t;
-
+function extendData(data, minX, maxX) {
   var i = 0;
   var extendedData = [];
   for (var d = new Date(minX); d <= maxX; d.setDate(d.getDate() + 1)) {
@@ -42,7 +32,23 @@ function drawLoginsChart(getEl) {
       throw new Error("Data is not sorted");
     }
   }
-  data = extendedData;
+  return extendedData;
+}
+
+function drawLoginsChart(getEl) {
+  var el = getEl();
+  if (!el) return;
+
+  var ctx = el.getContext('2d');
+
+  var data = getStatisticsDataYMDC('loginCountPerDay', 'count');
+  var data2 = getStatisticsDataYMDC('loginCountPerDay', 'users');
+
+  var minX = Math.min(data[0].t, data2[0].t);
+  var maxX = Math.max(data[data.length - 1].t, data2[data2.length - 1].t);
+
+  data = extendData(data, minX, maxX);
+  data2 = extendData(data2, minX, maxX);
 
   new Chart(ctx, { // eslint-disable-line no-new
     type: 'bar',
@@ -109,15 +115,26 @@ function drawLoginsChart(getEl) {
     "data": {
         "datasets": [
             {
-                "label": "",
-                "data": data,
+                label: getTranslation('of_users'),
+                data: data2,
                 type: 'line',
                 pointRadius: 0,
                 fill: false,
                 lineTension: 0,
                 borderWidth: 2,
-                backgroundColor: '#00F',
-                borderColor: '#00F'
+                backgroundColor: '#3b3eac',
+                borderColor: '#3b3eac'
+            },
+            {
+                label: getTranslation('of_logins'),
+                data: data,
+                type: 'line',
+                pointRadius: 0,
+                fill: false,
+                lineTension: 0,
+                borderWidth: 2,
+                backgroundColor: '#f90',
+                borderColor: '#f90'
             }
         ]
     }

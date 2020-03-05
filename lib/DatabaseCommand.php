@@ -98,7 +98,7 @@ class DatabaseCommand
     {
         $params = [];
         $query = 'SELECT UNIX_TIMESTAMP(STR_TO_DATE(CONCAT(year,"-",month,"-",day), "%Y-%m-%d")) AS day, ' .
-                 'logins AS count ' .
+                 'logins AS count, users ' .
                  'FROM ' . $this->tables[self::TABLE_SUM] . ' ' .
                  'WHERE ';
         $where = array_merge([Config::MODE_SP => null, Config::MODE_IDP => null], $where);

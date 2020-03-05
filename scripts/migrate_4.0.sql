@@ -81,7 +81,8 @@ FROM
 GROUP BY
   `day`,
   idpId,
-  spId;
+  spId
+HAVING day < DATE(NOW());
 
 INSERT INTO statistics_sums
 SELECT
@@ -97,7 +98,8 @@ FROM
   statistics_per_user
 GROUP BY
   `day`,
-  spId;
+  spId
+HAVING day < DATE(NOW());
 
 INSERT INTO statistics_sums
 SELECT
@@ -113,7 +115,8 @@ FROM
   statistics_per_user
 GROUP BY
   `day`,
-  idpId;
+  idpId
+HAVING day < DATE(NOW());
 
 INSERT INTO statistics_sums
 SELECT
@@ -128,13 +131,13 @@ SELECT
 FROM
   statistics_per_user
 GROUP BY
-  `day`;
+  `day`
+HAVING day < DATE(NOW());
 
 
 # add older stats
-INSERT INTO statistics_sums
+INSERT INTO statistics_sums (`year`, `month`, `day`, `idpId`, `spId`, `logins`, `users`)
 SELECT
-  NULL,
   `year`,
   `month`,
   `day`,
@@ -153,10 +156,10 @@ GROUP BY
   `sourceIdp`,
   `service`
 ON DUPLICATE KEY UPDATE id=id;
+# or if you want to merge, ON DUPLICATE KEY UPDATE logins=logins+VALUES(logins)
 
-INSERT INTO statistics_sums
+INSERT INTO statistics_sums (`year`, `month`, `day`, `idpId`, `spId`, `logins`, `users`)
 SELECT
-  NULL,
   `year`,
   `month`,
   `day`,
@@ -174,10 +177,10 @@ GROUP BY
   `day`,
   `service`
 ON DUPLICATE KEY UPDATE id=id;
+# or if you want to merge, ON DUPLICATE KEY UPDATE logins=logins+VALUES(logins)
 
-INSERT INTO statistics_sums
+INSERT INTO statistics_sums (`year`, `month`, `day`, `idpId`, `spId`, `logins`, `users`)
 SELECT
-  NULL,
   `year`,
   `month`,
   `day`,
@@ -195,10 +198,10 @@ GROUP BY
   `day`,
   `sourceIdp`
 ON DUPLICATE KEY UPDATE id=id;
+# or if you want to merge, ON DUPLICATE KEY UPDATE logins=logins+VALUES(logins)
 
-INSERT INTO statistics_sums
+INSERT INTO statistics_sums (`year`, `month`, `day`, `idpId`, `spId`, `logins`, `users`)
 SELECT
-  NULL,
   `year`,
   `month`,
   `day`,
@@ -215,3 +218,4 @@ GROUP BY
   `month`,
   `day`
 ON DUPLICATE KEY UPDATE id=id;
+# or if you want to merge, ON DUPLICATE KEY UPDATE logins=logins+VALUES(logins)

@@ -149,6 +149,8 @@ class Templates
         $translations = [
             'count' => $t->t('{proxystatistics:stats:count}'),
             'other' => $t->t('{proxystatistics:stats:other}'),
+            'of_logins' => $t->t('{proxystatistics:stats:of_logins}'),
+            'of_users' => $t->t('{proxystatistics:stats:of_users}'),
         ];
         foreach (Config::SIDES as $side) {
             $otherSide = Utils::theOther(Config::SIDES, $side);
