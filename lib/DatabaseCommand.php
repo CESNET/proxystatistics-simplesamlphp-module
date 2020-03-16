@@ -141,6 +141,7 @@ class DatabaseCommand
                 }
                 $query .= 'SUM(logins), COUNT(DISTINCT user) '
                     . 'FROM ' . $this->tables[self::TABLE_PER_USER] . ' '
+                    . 'WHERE day<DATE(NOW()) '
                     . 'GROUP BY ' . self::getAggregateGroupBy($ids) . ' '
                     . 'ON DUPLICATE KEY UPDATE id=id;';
                 // do nothing if row already exists
