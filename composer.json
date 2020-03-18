@@ -12,7 +12,7 @@
   ],
   "require": {
     "php": ">=7.1.0",
-    "cesnet/simplesamlphp-module-perun" : "~3.0",
+    "cesnet/simplesamlphp-module-perun" : "^3.0",
     "simplesamlphp/simplesamlphp": "~1.17",
     "ext-mysqli": "*",
     "ext-json": "*"
