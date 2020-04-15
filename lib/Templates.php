@@ -83,8 +83,8 @@ class Templates
         $translations = [
             'count' => $t->t('{proxystatistics:stats:count}'),
         ];
-        foreach (Config::SIDES as $side) {
-            $translations['tables_' . $side] = $t->t('{proxystatistics:stats:side_' . $side . '}');
+        foreach (Config::SIDES as $s) {
+            $translations['tables_' . $s] = $t->t('{proxystatistics:stats:side_' . $s . '}');
         }
         $t->data['head'] .= Utils::metaData('translations', $translations);
 
