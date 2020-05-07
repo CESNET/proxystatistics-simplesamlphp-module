@@ -2,8 +2,13 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [v4.1.0]
 #### Removed
 - Removed logging info about login in Statistics Process filter
+    * For storing this log please use filter in module [Perun].
+    
+[Perun]: "https://github.com/CESNET/perun-simplesamlphp-module/blob/master/lib/Auth/Process/LoginInfo.php"
 
 ## [v4.0.0]
 #### Added
@@ -155,6 +160,7 @@ All notable changes to this project will be documented in this file.
 - Changelog
 
 [Unreleased]: https://github.com/CESNET/proxystatistics-simplesamlphp-module/tree/master
+[v4.1.0]: https://github.com/CESNET/proxystatistics-simplesamlphp-module/tree/v4.1.0
 [v4.0.0]: https://github.com/CESNET/proxystatistics-simplesamlphp-module/tree/v4.0.0
 [v3.2.1]: https://github.com/CESNET/proxystatistics-simplesamlphp-module/tree/v3.2.1
 [v3.2.0]: https://github.com/CESNET/proxystatistics-simplesamlphp-module/tree/v3.2.0
