@@ -127,6 +127,19 @@ class DatabaseCommand
         return $this->read($query, $params)->fetchAll(PDO::FETCH_NUM);
     }
 
+    public function get_api_stats($year)
+    {
+        $query = 'select CONCAT(year,"-",month,"-",day) AS day, ss.spId, ss.identifier as sp_identifier, ss.name as sp_name, si.idpId, si.identifier as idp_identifier, si.name as idp_name, logins, users
+from (' . $this->tables[self::TABLE_SUM] . ' join ' . $this->tables[self::TABLE_IDP] . ' si on ' . $this->tables[self::TABLE_SUM] . '.idpId = si.idpId) left join ' . $this->tables[self::TABLE_SP] . ' ss on ' . $this->tables[self::TABLE_SUM] . '.spId = ss.spId
+group by year, month, day, spId, idpId
+having spId is not NULL and year="' . $year . '"';
+
+        $params = [];
+
+        return $this->read($query, $params)->fetchAll(PDO::FETCH_NAMED);
+
+    }
+
     public function aggregate()
     {
         foreach ([self::TABLE_IDS[self::TABLE_IDP], null] as $idpId) {
