@@ -3,8 +3,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v4.3.0]
 #### Added
 - Add statistics view for 3 months
+
+#### Fixed
+- Change aggregation to deal with extra columns
+- Use absolute URL instead of relative URLs on some places
+- Correct dependencies
 
 ## [v4.2.2]
 #### Fixed
@@ -175,6 +181,7 @@ All notable changes to this project will be documented in this file.
 - Changelog
 
 [Unreleased]: https://github.com/CESNET/proxystatistics-simplesamlphp-module/tree/master
+[v4.3.0]: https://github.com/CESNET/proxystatistics-simplesamlphp-module/tree/v4.3.0
 [v4.2.2]: https://github.com/CESNET/proxystatistics-simplesamlphp-module/tree/v4.2.2
 [v4.2.1]: https://github.com/CESNET/proxystatistics-simplesamlphp-module/tree/v4.2.1
 [v4.2.0]: https://github.com/CESNET/proxystatistics-simplesamlphp-module/tree/v4.2.0
