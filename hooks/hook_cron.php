@@ -9,7 +9,6 @@ use SimpleSAML\Module\proxystatistics\DatabaseCommand;
  * Hook to run a cron job.
  *
  * @param array $croninfo  Output
- * @author Pavel Břoušek <brousek@ics.muni.cz>
  */
 function proxystatistics_hook_cron(&$croninfo)
 {

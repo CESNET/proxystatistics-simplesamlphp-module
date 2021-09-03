@@ -9,7 +9,7 @@ function getStatisticsData(name) {
 function getStatisticsDataYMDC(name, field) {
   return getStatisticsData(name).map(function mapItemToDate(item) {
     return {
-      t: new Date(item.day * 1000),
+      x: new Date(item.day * 1000),
       y: item[field]
     };
   });
@@ -23,11 +23,11 @@ function extendData(data, minX, maxX) {
   var i = 0;
   var extendedData = [];
   for (var d = new Date(minX); d <= maxX; d.setDate(d.getDate() + 1)) {
-    if (data[i].t.getTime() === d.getTime()) {
+    if (data[i].x.getTime() === d.getTime()) {
       extendedData.push(data[i]);
       i += 1;
-    } else if (data[i].t.getTime() > d.getTime()) {
-      extendedData.push({ t: new Date(d), y: 0 });
+    } else if (data[i].x.getTime() > d.getTime()) {
+      extendedData.push({ x: new Date(d), y: 0 });
     } else {
       throw new Error("Data is not sorted");
     }
@@ -39,13 +39,22 @@ function drawLoginsChart(getEl) {
   var el = getEl();
   if (!el) return;
 
-  var ctx = el.getContext('2d');
+  var ctx = el;
+
+  var previousChart = Chart.getChart(ctx);
+  if (previousChart) {
+    previousChart.destroy();
+  }
 
   var data = getStatisticsDataYMDC('loginCountPerDay', 'count');
   var data2 = getStatisticsDataYMDC('loginCountPerDay', 'users');
 
-  var minX = Math.min(data[0].t, data2[0].t);
-  var maxX = Math.max(data[data.length - 1].t, data2[data2.length - 1].t);
+  if (!data.length || !data2.length) {
+    return;
+  }
+
+  var minX = Math.min(data[0].x, data2[0].x);
+  var maxX = Math.max(data[data.length - 1].x, data2[data2.length - 1].x);
 
   data = extendData(data, minX, maxX);
   data2 = extendData(data2, minX, maxX);
@@ -53,63 +62,60 @@ function drawLoginsChart(getEl) {
   new Chart(ctx, { // eslint-disable-line no-new
     type: 'bar',
     options: {
-      responsive: true,
       maintainAspectRatio: false,
-      ticks: {
-        beginAtZero: true
+      plugins: {
+        tooltips: {
+          intersect: false,
+          mode: 'index',
+          callbacks: {
+            label: function showLabel(tooltipItem) {
+              var label = tooltipItem.label || '';
+              if (label) {
+                label += ': ';
+              }
+              label += tooltipItem.parsed;
+              return label;
+            }
+          }
+        }
       },
       scales: {
-        xAxes: [{
+        x: {
+          beginAtZero: true,
           type: 'time',
           time: { // do not set round: 'day', because it breaks zooming out from 7 or fewer days
             isoWeekday: true,
             minUnit: 'day',
             tooltipFormat: 'l'
           }
-        }],
-        yAxes: [{
-          scaleLabel: {
+        },
+        y: {
+          beginAtZero: true,
+          title: {
             display: false
           }
-        }]
-      },
-      legend: {
-        display: false
-      },
-      tooltips: {
-        intersect: false,
-        mode: 'index',
-        callbacks: {
-          label: function showLabel(tooltipItem, myData) {
-            var label = myData.datasets[tooltipItem.datasetIndex].label || '';
-            if (label) {
-              label += ': ';
-            }
-            label += parseInt(tooltipItem.value, 10);
-            return label;
-          }
-        }
-      },
-      pan: {
-        enabled: true,
-        mode: 'x',
-        rangeMin: {
-          x: minX
-        },
-        rangeMax: {
-          x: maxX
         }
       },
       zoom: {
-        enabled: true,
-        drag: false,
-        mode: 'x',
-        rangeMin: {
-          x: minX
+        limits: {
+          x: {min: minX, max: maxX}
         },
-        rangeMax: {
-          x: maxX
-        }
+        pan: {
+          enabled: true,
+          mode: 'x'
+        },
+        zoom: {
+          wheel: {
+            enabled: true
+          },
+          pinch: {
+            enabled: true
+          },
+          /*drag: {
+            enabled: false
+          },*/
+          mode: 'x'
+        },
       }
     },
     "data": {
@@ -142,8 +148,6 @@ function drawLoginsChart(getEl) {
 }
 
 var pieColors = [
-  '#3366CC', '#DC3912', '#FF9900', '#109618', '#990099', '#3B3EAC', '#0099C6', '#DD4477', '#66AA00', '#B82E2E',
-  '#316395', '#994499', '#22AA99', '#AAAA11', '#6633CC', '#E67300', '#8B0707', '#329262', '#5574A6', '#3B3EAC',
   '#3366CC', '#DC3912', '#FF9900', '#109618', '#990099', '#3B3EAC', '#0099C6', '#DD4477', '#66AA00', '#B82E2E',
   '#316395', '#994499', '#22AA99', '#AAAA11', '#6633CC', '#E67300', '#8B0707', '#329262', '#5574A6', '#3B3EAC'
 ];
@@ -189,8 +193,19 @@ function drawPieChart(dataName, viewCols, url, getEl) {
   if (!el) return;
 
   var ctx = el.getContext('2d');
+
+  var previousChart = Chart.getChart(ctx);
+  if (previousChart) {
+    previousChart.destroy();
+  }
+
   var processedData = processDataForPieChart(getStatisticsData(dataName), viewCols);
   var data = processedData.data;
+
+  if (!data.length) {
+    return;
+  }
+
   var other = processedData.other;
   var total = processedData.total;
   var col = viewCols || [0, 1];
@@ -209,72 +224,38 @@ function drawPieChart(dataName, viewCols, url, getEl) {
           }]
       },
       options: {
-        responsive: true,
         maintainAspectRatio: false,
-        legend: {
-          display: false
-        },
-        tooltips: {
-          callbacks: {
-            label: function generateLabel(tooltipItem, myData) {
-              var label = myData.datasets[tooltipItem.datasetIndex].label || '';
+        plugins: {
+          legend: {
+            position: 'right'
+          },
+          tooltip: {
+            callbacks: {
+              label: function generateLabel(tooltipItem) {
+                var label = tooltipItem.label || '';
 
-              if (label) {
-                  label += ': ';
-              }
-              var value = myData.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
-              label += value + ' (';
-              label += Math.round((value / total) * 1000) / 10;
-              label += ' %)';
-              return label;
-            }
-          }
-        },
-        legendCallback: function legendCallback(c) {
-          var text = [];
-          text.push('<ul class="chart-legend">');
-
-          var datasets = c.data.datasets;
-          var labels = c.data.labels;
-
-          if (datasets.length) {
-            for (var i = 0; i < datasets[0].data.length; ++i) {
-              var liClasses = ['chart-legend-item'];
-              if (other && i === datasets[0].data.length - 1) {
-                liClasses.push('other');
-              }
-              text.push('<li class="' + liClasses.join(' ') + '">');
-              if (labels[i]) {
-                var label = labels[i];
-                if (url && (!other || i < datasets[0].data.length - 1)) {
-                  label = '<a href="' + url + encodeURIComponent(data[i][1]) + '" class="item">' + label + '</a>';
-                } else {
-                  label = '<span class="item">' + label + '</span>';
+                if (label) {
+                    label += ': ';
                 }
-                text.push(label);
+                var value = tooltipItem.parsed;
+                label += value + ' (';
+                label += Math.round((value / total) * 1000) / 10;
+                label += ' %)';
+                return label;
               }
-              text.push('</li>');
             }
           }
-
-          text.push('</ul>');
-          return text.join('');
         }
       }
   });
   if (url) {
     el.addEventListener('click', function pieClick(evt) {
-      var activePoints = chart.getElementsAtEvent(evt);
-      if (activePoints[0]
-        && data[activePoints[0]._index][1] !== null) { // eslint-disable-line no-underscore-dangle
-        window.location.href = url + encodeURIComponent(
-          data[activePoints[0]._index][1] // eslint-disable-line no-underscore-dangle
-        );
+      var activePoints = chart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, false);
+      if (activePoints.length) {
+        window.location.href = url + encodeURIComponent(data[activePoints[0].index][1]);
       }
     });
   }
-  var legendContainer = el.parentNode.parentNode.querySelector('.legend-container');
-  legendContainer.innerHTML = chart.generateLegend();
 }
 
 function getDrawChart(side) {
@@ -379,9 +360,8 @@ function chartInit() {
 }
 
 $(document).ready(function docReady() {
-  Chart.platform.disableCSSInjection = true;
   var loginsDashboard = document.getElementById('loginsDashboard');
-  if (loginsDashboard !== null && loginsDashboard.dataset.locale === 'cs') {
+  if (loginsDashboard !== null && loginsDashboard.dataset.locale) {
     moment.locale(loginsDashboard.dataset.locale);
   }
 

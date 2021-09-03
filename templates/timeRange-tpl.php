@@ -1,9 +1,5 @@
 <?php declare(strict_types=1);
 
-/**
- * @author Pavel Břoušek <brousek@ics.muni.cz>
- */
-
 ?>
 <div class="timeRange">
     <h4><?php echo $this->t('{proxystatistics:stats:select_time_range}'); ?></h4>
@@ -13,7 +9,7 @@
             if (isset($this->data[$var])) {
                 ?>
                 <input name="<?php echo $var; ?>" type="hidden"
-                    value="<?php echo htmlspecialchars($this->data[$var]); ?>">
+                    value="<?php echo htmlspecialchars(strval($this->data[$var])); ?>">
                 <?php
             }
         }

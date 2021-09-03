@@ -59,7 +59,7 @@ h1, h2, h3 {
 .legend-container, .canvas-container, .table-container {
     height: 90vh;
     max-height: 500px;
-    max-width: 100%;
+    width: 100%;
 }
 
 .hidden {
