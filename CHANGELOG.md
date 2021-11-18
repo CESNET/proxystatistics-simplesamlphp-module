@@ -1,3 +1,15 @@
+# [5.0.0](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v4.3.0...v5.0.0) (2021-11-18)
+
+
+### chore
+
+* **deps:** update Chart.js to 3.5.1 ([bfabef2](https://github.com/CESNET/proxystatistics-simplesamlphp-module/commit/bfabef2e28669292aa7d662f91bb58a6aadc092f))
+
+
+### BREAKING CHANGES
+
+* **deps:** legend items of pie chart do not link to detail pages anymore
+
 # Change Log
 All notable changes to this project will be documented in this file.
 
