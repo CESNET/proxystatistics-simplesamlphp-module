@@ -1,11 +1,5 @@
 <?php declare(strict_types=1);
 
-/**
- * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
- * @author Dominik Baránek <0Baranek.dominik0@gmail.com>
- * @author Pavel Břoušek <brousek@ics.muni.cz>
- */
-
 use SimpleSAML\Module\proxystatistics\Config;
 use SimpleSAML\Module\proxystatistics\Templates;
 

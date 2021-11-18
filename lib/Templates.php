@@ -1,10 +1,5 @@
 <?php declare(strict_types=1);
 
-/**
- * @author Pavel Břoušek <brousek@ics.muni.cz>
- * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
- */
-
 namespace SimpleSAML\Module\proxystatistics;
 
 use SimpleSAML\Auth\Simple;
@@ -34,7 +29,7 @@ class Templates
             <div class="canvas-container col-md-7">
                 <canvas id="<?php echo $id; ?>" class="pieChart chart-<?php echo $id; ?>"></canvas>
             </div>
-            <div class="legend-container col-md-5"></div>
+            <div class="legend-container col-md-5" id="legend-container"></div>
         </div>
         <?php
     }
@@ -92,6 +87,9 @@ class Templates
 
         $translations = [
             'count' => $t->t('{proxystatistics:stats:count}'),
+            'other' => $t->t('{proxystatistics:stats:other}'),
+            'of_logins' => $t->t('{proxystatistics:stats:of_logins}'),
+            'of_users' => $t->t('{proxystatistics:stats:of_users}'),
         ];
         foreach (Config::SIDES as $s) {
             $translations['tables_' . $s] = $t->t('{proxystatistics:stats:side_' . $s . '}');
@@ -262,20 +260,16 @@ class Templates
             self::getFullUrl('assets/css/bootstrap.min.css') . '" />';
         $t->data['head'] .= '<link rel="stylesheet"  media="screen" type="text/css" href="' .
             self::getFullUrl('assets/css/statisticsproxy.css') . '" />';
-        $t->data['head'] .= '<link rel="stylesheet" type="text/css" href="' .
-            self::getFullUrl('assets/css/Chart.min.css') . '">';
         $t->data['head'] .= '<script type="text/javascript" src="' .
-            self::getFullUrl('assets/js/moment.min.js') . '"></script>';
-        if ($t->getLanguage() === 'cs') {
-            $t->data['head'] .= '<script type="text/javascript" src="' .
-                self::getFullUrl('assets/js/moment.cs.min.js') . '"></script>';
-        }
+            self::getFullUrl('assets/js/moment-with-locales.min.js') . '"></script>';
         $t->data['head'] .= '<script type="text/javascript" src="' .
-            self::getFullUrl('assets/js/Chart.min.js') . '"></script>';
+            self::getFullUrl('assets/js/chart.min.js') . '"></script>';
         $t->data['head'] .= '<script type="text/javascript" src="' .
             self::getFullUrl('assets/js/hammer.min.js') . '"></script>';
         $t->data['head'] .= '<script type="text/javascript" src="' .
             self::getFullUrl('assets/js/chartjs-plugin-zoom.min.js') . '"></script>';
+        $t->data['head'] .= '<script type="text/javascript" src="' .
+            self::getFullUrl('assets/js/chartjs-adapter-moment.js') . '"></script>';
         $t->data['head'] .= '<script type="text/javascript" src="' .
             self::getFullUrl('assets/js/index.js') . '"></script>';
 

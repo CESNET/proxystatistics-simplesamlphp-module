@@ -2,11 +2,6 @@
 
 declare(strict_types=1);
 
-/**
- * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
- * @author Pavel Břoušek <brousek@ics.muni.cz>
- */
-
 namespace SimpleSAML\Module\proxystatistics;
 
 use PDO;

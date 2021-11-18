@@ -1,15 +1,13 @@
-<?php declare(strict_types=1);
+<?php
 
-/**
- * @author Pavel Břoušek <brousek@ics.muni.cz>
- */
+declare(strict_types=1);
 
 use SimpleSAML\Module\proxystatistics\Config;
 
 $this->includeAtTemplateBase('includes/header.php');
 ?>
 
-<div id="tabdiv" data-activetab="<?php echo htmlspecialchars($this->data['tab']); ?>">
+<div id="tabdiv" data-activetab="<?php echo htmlspecialchars(strval($this->data['tab'])); ?>">
     <ul class="tabset_tabs" width="100px">
         <li>
             <a <?php echo $this->data['tabsAttributes']['PROXY'] ?>>

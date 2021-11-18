@@ -5,9 +5,6 @@ declare(strict_types=1);
 /**
  * This is an example configuration of SimpleSAMLphp Perun interface and additional features. Copy this file to default
  * config directory and edit the properties.
- *
- * @author Pavel Vyskočil <vyskocilpavel@muni.cz>
- * @author Pavel Břoušek <brousek@ics.muni.cz>
  */
 
 $config = [
