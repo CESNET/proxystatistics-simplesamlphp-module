@@ -8,8 +8,10 @@ function getStatisticsData(name) {
 
 function getStatisticsDataYMDC(name, field) {
   return getStatisticsData(name).map(function mapItemToDate(item) {
+    var d = new Date(item.day * 1000);
+    d.setHours(0);
     return {
-      x: new Date(item.day * 1000),
+      x: d,
       y: item[field]
     };
   });
@@ -22,7 +24,7 @@ function getTranslation(str) {
 function extendData(data, minX, maxX) {
   var i = 0;
   var extendedData = [];
-  for (var d = new Date(minX); d <= maxX; d.setDate(d.getDate() + 1)) {
+  for (var d = new Date(minX); d <= maxX; d.setDate(d.getDate() + 1),d.setHours(0)) {
     if (data[i].x.getTime() === d.getTime()) {
       extendedData.push(data[i]);
       i += 1;
