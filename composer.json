@@ -16,8 +16,6 @@
   ],
   "require": {
     "php": ">=7.1",
-    "simplesamlphp/simplesamlphp": "~1.17",
-    "ext-pdo": "*",
     "ext-json": "*"
   },
   "suggest": {
