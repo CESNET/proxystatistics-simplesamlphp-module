@@ -6,14 +6,14 @@ CREATE TABLE `statistics_sums` (
   `year` YEAR NOT NULL,
   `month` TINYINT UNSIGNED DEFAULT NULL,
   `day` TINYINT UNSIGNED DEFAULT NULL,
-  `idpId` INT UNSIGNED NOT NULL DEFAULT 0,
-  `spId` INT UNSIGNED NOT NULL DEFAULT 0,
+  `idp_id` INT UNSIGNED NOT NULL DEFAULT 0,
+  `sp_id` INT UNSIGNED NOT NULL DEFAULT 0,
   `logins` INT UNSIGNED DEFAULT NULL,
   `users` INT UNSIGNED DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `year` (`year`,`month`,`day`,`idpId`,`spId`),
-  KEY `idpId` (`idpId`),
-  KEY `spId` (`spId`)
+  UNIQUE KEY `year` (`year`,`month`,`day`,`idp_id`,`sp_id`),
+  KEY `idp_id` (`idp_id`),
+  KEY `sp_id` (`sp_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- ROWS
 -- each row contains daily users = COUNT(1) and daily logins = SUM(logins) from statistics_per_user
@@ -27,29 +27,29 @@ CREATE TABLE `statistics_sums` (
 -- data is being kept for ~1 month
 CREATE TABLE `statistics_per_user` (
   `day` date NOT NULL,
-  `idpId` INT UNSIGNED NOT NULL,
-  `spId` INT UNSIGNED NOT NULL,
+  `idp_id` INT UNSIGNED NOT NULL,
+  `sp_id` INT UNSIGNED NOT NULL,
   `user` VARCHAR(255) NOT NULL,
   `logins` INT UNSIGNED DEFAULT '1',
-  PRIMARY KEY (`day`,`idpId`,`spId`,`user`),
-  KEY `idpId` (`idpId`),
-  KEY `spId` (`spId`)
+  PRIMARY KEY (`day`,`idp_id`,`sp_id`,`user`),
+  KEY `idp_id` (`idp_id`),
+  KEY `sp_id` (`sp_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- identity providers
 CREATE TABLE `statistics_idp` (
-  `idpId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `idp_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `identifier` VARCHAR(255) NOT NULL,
   `name` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`idpId`),
+  PRIMARY KEY (`idp_id`),
   UNIQUE KEY `identifier` (`identifier`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- services
 CREATE TABLE `statistics_sp` (
-  `spId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `sp_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `identifier` VARCHAR(255) NOT NULL,
   `name` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`spId`),
+  PRIMARY KEY (`sp_id`),
   UNIQUE KEY `identifier` (`identifier`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
