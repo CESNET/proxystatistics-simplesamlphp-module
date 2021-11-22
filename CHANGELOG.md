@@ -1,3 +1,15 @@
+# [6.0.0](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v5.0.0...v6.0.0) (2021-11-22)
+
+
+### Features
+
+* adapt for PostgreSQL ([d778a96](https://github.com/CESNET/proxystatistics-simplesamlphp-module/commit/d778a96c2f9b5d1a15b349b0effb4d44fea482d7))
+
+
+### BREAKING CHANGES
+
+* renamed columns idpId and spId, see migrations scripts
+
 # [5.0.0](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v4.3.0...v5.0.0) (2021-11-18)
 
 
