@@ -16,10 +16,16 @@
   ],
   "require": {
     "php": ">=7.1",
-    "ext-json": "*"
+    "ext-ctype": "*",
+    "ext-filter": "*",
+    "ext-json": "*",
+    "ext-PDO": "*",
+    "simplesamlphp/simplesamlphp": "^1.19"
   },
   "suggest": {
-    "cesnet/simplesamlphp-module-perun" : "for logging that a user accessed a service"
+    "cesnet/simplesamlphp-module-perun" : "for logging that a user accessed a service",
+    "ext-pdo_mysql": "for MySQL database",
+    "ext-pdo_pgsql": "for PostgreSQL database"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "*",
