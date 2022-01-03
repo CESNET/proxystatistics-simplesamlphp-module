@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Script for migrate statistics data from version < 1.6.x to version > 2.0.0
+ * Script for migrate statistics data from version < 1.6.x to version > 2.0.0.
  *
  * You need firstly export the tables identityProviders and serviceProviders into two separate CSV files.
  *
@@ -35,9 +35,9 @@ $line = null;
 // Identity providers part
 $file = fopen($identityProvidersFileName, 'r');
 
-while (! feof($file)) {
+while (!feof($file)) {
     $line = fgetcsv($file);
-    if ($line !== null) {
+    if (null !== $line) {
         $lineInsert = 'INSERT INTO ' . $tableName . '(year, month, day, sourceIdp, service, count) ' .
             'VALUES(' . $line[0] . ', ' . $line[1] . ', ' . $line[2] . ', "' . $line[3] . '","" , ' . $line[4] . ');' .
             PHP_EOL;
@@ -50,9 +50,9 @@ fclose($file);
 // Service providers part
 $file = fopen($serviceProvidersFileName, 'r');
 
-while (! feof($file)) {
+while (!feof($file)) {
     $line = fgetcsv($file);
-    if ($line !== null) {
+    if (null !== $line) {
         $lineInsert = 'INSERT INTO ' . $tableName . '(year, month, day, sourceIdp, service, count) ' .
             'VALUES(' . $line[0] . ', ' . $line[1] . ', ' . $line[2] . ', "", "' . $line[3] . '", ' . $line[4] . ');' .
             PHP_EOL;

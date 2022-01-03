@@ -1,4 +1,4 @@
 .idea
 vendor
 modules
-composer.lock
+node_modules

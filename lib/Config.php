@@ -36,7 +36,7 @@ class Config
 
     private $mode;
 
-    private static $instance = null;
+    private static $instance;
 
     private function __construct()
     {
@@ -52,9 +52,10 @@ class Config
 
     public static function getInstance()
     {
-        if (self::$instance === null) {
+        if (null === self::$instance) {
             self::$instance = new self();
         }
+
         return self::$instance;
     }
 
@@ -81,6 +82,7 @@ class Config
     public function getSideInfo($side)
     {
         assert(in_array($side, [self::SIDES], true));
+
         return array_merge([
             'name' => '',
             'id' => '',

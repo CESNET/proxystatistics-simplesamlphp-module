@@ -23,6 +23,6 @@
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "*",
-    "symplify/easy-coding-standard": "^9.2"
+    "symplify/easy-coding-standard": "^10.0"
   }
 }

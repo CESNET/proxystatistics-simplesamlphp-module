@@ -24,13 +24,13 @@
         ];
         $i = 0;
         ?>
-        <?php foreach ($values as $value => $str) : ?>
+        <?php foreach ($values as $value => $str) { ?>
             <label>
                 <input id="<?php echo $i; ?>" type="radio" name="lastDays" value="<?php echo $value; ?>"
-                        <?php echo $this->data['lastDays'] === $value ? 'checked=true' : '' ?>>
+                        <?php echo $this->data['lastDays'] === $value ? 'checked=true' : ''; ?>>
                 <?php echo $this->t('{proxystatistics:stats:time_range_' . $str . '}'); ?>
             </label>
-            <?php $i++; ?>
-        <?php endforeach; ?>
+            <?php ++$i; ?>
+        <?php } ?>
     </form>
 </div>

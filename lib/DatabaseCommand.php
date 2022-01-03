@@ -37,7 +37,7 @@ class DatabaseCommand
 
     private $config;
 
-    private $conn = null;
+    private $conn;
 
     private $mode;
 
@@ -47,7 +47,7 @@ class DatabaseCommand
     {
         $this->config = Config::getInstance();
         $this->conn = Database::getInstance($this->config->getStore());
-        if ($this->conn->getDriver() === 'pgsql') {
+        if ('pgsql' === $this->conn->getDriver()) {
             $this->escape_char = '"';
         }
         $this->tables = array_merge($this->tables, $this->config->getTables());
@@ -66,6 +66,7 @@ class DatabaseCommand
         foreach (Config::SIDES as $side) {
             if (empty($entities[$side]['id'])) {
                 Logger::error('idpEntityId or spEntityId is empty and login log was not inserted into the database.');
+
                 return;
             }
         }
@@ -79,7 +80,7 @@ class DatabaseCommand
             $ids[$tableId] = $this->getIdFromIdentifier($table, $entities[$side], $tableId);
         }
 
-        if ($this->writeLogin($date, $ids, $userId) === false) {
+        if (false === $this->writeLogin($date, $ids, $userId)) {
             Logger::error('The login log was not inserted.');
         }
     }
@@ -87,6 +88,7 @@ class DatabaseCommand
     public function getNameById($side, $id)
     {
         $table = self::TABLE_SIDES[$side];
+
         return $this->read(
             'SELECT COALESCE(name, identifier) ' .
             'FROM ' . $this->tables[$table] . ' ' .
@@ -100,7 +102,7 @@ class DatabaseCommand
     public function getLoginCountPerDay($days, $where = [])
     {
         $params = [];
-        if ($this->conn->getDriver() === 'pgsql') {
+        if ('pgsql' === $this->conn->getDriver()) {
             $query = "SELECT EXTRACT(epoch FROM TO_DATE(CONCAT(year,'-',month,'-',day), 'YYYY-MM-DD')) AS day, ";
         } else {
             $query = "SELECT UNIX_TIMESTAMP(STR_TO_DATE(CONCAT(year,'-',month,'-',day), '%Y-%m-%d')) AS day, ";
@@ -118,7 +120,8 @@ class DatabaseCommand
                   'ORDER BY day ASC';
 
         return $this->read($query, $params)
-            ->fetchAll(PDO::FETCH_ASSOC);
+            ->fetchAll(PDO::FETCH_ASSOC)
+        ;
     }
 
     public function getAccessCount($side, $days, $where = [])
@@ -136,7 +139,8 @@ class DatabaseCommand
         $query .= 'ORDER BY SUM(logins) DESC';
 
         return $this->read($query, $params)
-            ->fetchAll(PDO::FETCH_NUM);
+            ->fetchAll(PDO::FETCH_NUM)
+        ;
     }
 
     public function aggregate()
@@ -154,13 +158,13 @@ class DatabaseCommand
                         'day'
                     ) . '), EXTRACT(DAY FROM ' . $this->escape_col('day') . '), ';
                 foreach ($ids as $id) {
-                    $query .= ($id === null ? '0' : $id) . ',';
+                    $query .= (null === $id ? '0' : $id) . ',';
                 }
                 $query .= 'SUM(logins), COUNT(DISTINCT ' . $this->escape_col('user') . ') '
                     . 'FROM ' . $this->tables[self::TABLE_PER_USER] . ' '
                     . 'WHERE day<DATE(NOW()) '
                     . 'GROUP BY ' . $this->getAggregateGroupBy($ids) . ' ';
-                if ($this->conn->getDriver() === 'pgsql') {
+                if ('pgsql' === $this->conn->getDriver()) {
                     $query .= 'ON CONFLICT (' . $this->escape_cols(
                         ['year', 'month', 'day', 'idp_id', 'sp_id']
                     ) . ') DO NOTHING;';
@@ -168,7 +172,7 @@ class DatabaseCommand
                     $query .= 'ON DUPLICATE KEY UPDATE id=id;';
                 }
                 // do nothing if row already exists
-                if (! $this->conn->write($query)) {
+                if (!$this->conn->write($query)) {
                     Logger::warning($msg . ' failed');
                 }
             }
@@ -178,7 +182,7 @@ class DatabaseCommand
 
         $msg = 'Deleting detailed statistics';
         Logger::info($msg);
-        if ($this->conn->getDriver() === 'pgsql') {
+        if ('pgsql' === $this->conn->getDriver()) {
             $make_date = 'MAKE_DATE(' . $this->escape_cols(['year', 'month', 'day']) . ')';
             $date_clause = sprintf('CURRENT_DATE - INTERVAL \'%s DAY\' ', $keepPerUserDays);
             $params = [];
@@ -198,7 +202,7 @@ class DatabaseCommand
             'day'
         ) . ' IN (SELECT ' . $make_date . ' FROM ' . $this->tables[self::TABLE_SUM] . ')';
         if (
-            ! $this->conn->write($query, $params)
+            !$this->conn->write($query, $params)
         ) {
             Logger::warning($msg . ' failed');
         }
@@ -229,7 +233,7 @@ class DatabaseCommand
             $table = self::TABLE_SIDES[$side];
             $column = self::TABLE_IDS[$table];
             $part = $column;
-            if ($value === null) {
+            if (null === $value) {
                 $part .= '=0';
             } else {
                 $part .= '=:id';
@@ -258,7 +262,7 @@ class DatabaseCommand
         $placeholders = array_map(['self', 'prependColon'], $fields);
         $query = 'INSERT INTO ' . $this->tables[self::TABLE_PER_USER] . ' (' . $this->escape_cols($fields) . ')' .
                  ' VALUES (' . implode(', ', $placeholders) . ') ';
-        if ($this->conn->getDriver() === 'pgsql') {
+        if ('pgsql' === $this->conn->getDriver()) {
             $query .= 'ON CONFLICT (' . $this->escape_cols(
                 ['day', 'idp_id', 'sp_id', 'user']
             ) . ') DO UPDATE SET "logins" = ' . $this->tables[self::TABLE_PER_USER] . '.logins + 1;';
@@ -275,11 +279,11 @@ class DatabaseCommand
             Config::MODE_IDP => [],
             Config::MODE_SP => [],
         ];
-        if ($this->mode !== Config::MODE_IDP && $this->mode !== Config::MODE_MULTI_IDP) {
+        if (Config::MODE_IDP !== $this->mode && Config::MODE_MULTI_IDP !== $this->mode) {
             $entities[Config::MODE_IDP]['id'] = $request['saml:sp:IdP'];
             $entities[Config::MODE_IDP]['name'] = $request['Attributes']['sourceIdPName'][0];
         }
-        if ($this->mode !== Config::MODE_SP) {
+        if (Config::MODE_SP !== $this->mode) {
             $entities[Config::MODE_SP]['id'] = $request['Destination']['entityid'];
             if (isset($request['Destination']['UIInfo']['DisplayName']['en'])) {
                 $entities[Config::MODE_SP]['name'] = $request['Destination']['UIInfo']['DisplayName']['en'];
@@ -288,14 +292,14 @@ class DatabaseCommand
             }
         }
 
-        if ($this->mode !== Config::MODE_PROXY && $this->mode !== Config::MODE_MULTI_IDP) {
+        if (Config::MODE_PROXY !== $this->mode && Config::MODE_MULTI_IDP !== $this->mode) {
             $entities[$this->mode] = $this->config->getSideInfo($this->mode);
             if (empty($entities[$this->mode]['id']) || empty($entities[$this->mode]['name'])) {
                 Logger::error('Invalid configuration (id, name) for ' . $this->mode);
             }
         }
 
-        if ($this->mode === Config::MODE_MULTI_IDP) {
+        if (Config::MODE_MULTI_IDP === $this->mode) {
             $entities[Config::MODE_IDP] = $this->config->getSideInfo(Config::MODE_IDP);
             if (empty($entities[Config::MODE_IDP]['id']) || empty($entities[Config::MODE_IDP]['name'])) {
                 Logger::error('Invalid configuration (id, name) for ' . $this->mode);
@@ -310,7 +314,7 @@ class DatabaseCommand
         $identifier = $entity['id'];
         $name = $entity['name'];
         $query = 'INSERT INTO ' . $this->tables[$table] . '(identifier, name) VALUES (:identifier, :name1) ';
-        if ($this->conn->getDriver() === 'pgsql') {
+        if ('pgsql' === $this->conn->getDriver()) {
             $query .= 'ON CONFLICT (identifier) DO UPDATE SET name = :name2;';
         } else {
             $query .= 'ON DUPLICATE KEY UPDATE name = :name2';
@@ -320,22 +324,24 @@ class DatabaseCommand
             'name1' => $name,
             'name2' => $name,
         ]);
+
         return $this->read('SELECT ' . $idColumn . ' FROM ' . $this->tables[$table]
             . ' WHERE identifier=:identifier', [
                 'identifier' => $identifier,
             ])
-            ->fetchColumn();
+            ->fetchColumn()
+        ;
     }
 
     private function addDaysRange($days, &$query, &$params, $not = false)
     {
-        if ($days !== 0) {    // 0 = all time
-            if (stripos($query, 'WHERE') === false) {
+        if (0 !== $days) {    // 0 = all time
+            if (false === stripos($query, 'WHERE')) {
                 $query .= 'WHERE';
             } else {
                 $query .= 'AND';
             }
-            if ($this->conn->getDriver() === 'pgsql') {
+            if ('pgsql' === $this->conn->getDriver()) {
                 $query .= ' MAKE_DATE(year,month,day) ';
             } else {
                 $query .= " CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) ";
@@ -343,8 +349,8 @@ class DatabaseCommand
             if ($not) {
                 $query .= 'NOT ';
             }
-            if ($this->conn->getDriver() === 'pgsql') {
-                if (! is_int($days) && ! ctype_digit($days)) {
+            if ('pgsql' === $this->conn->getDriver()) {
+                if (!is_int($days) && !ctype_digit($days)) {
                     throw new \Exception('days have to be an integer');
                 }
                 $query .= sprintf('BETWEEN CURRENT_DATE - INTERVAL \'%s DAY\' AND CURRENT_DATE ', $days);
@@ -359,10 +365,11 @@ class DatabaseCommand
     {
         $columns = ['day'];
         foreach ($ids as $id) {
-            if ($id !== null) {
+            if (null !== $id) {
                 $columns[] = $id;
             }
         }
+
         return $this->escape_cols($columns);
     }
 }
