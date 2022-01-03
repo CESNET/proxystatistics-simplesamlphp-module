@@ -21,7 +21,7 @@ $this->includeAtTemplateBase('includes/header.php');
         </div>
     </div>
     <?php Templates::loginsDashboard(); ?>
-    <div class="<?php echo $this->data['detailGraphClass'] ?>">
+    <div class="<?php echo $this->data['detailGraphClass']; ?>">
         <h3><?php echo $this->t('{proxystatistics:stats:' . $this->data['side'] . 'Detail_graph_header}'); ?></h3>
         <div class="legend">
             <div>

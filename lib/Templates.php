@@ -59,7 +59,6 @@ class Templates
         $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT, [
             'options' => [
                 'min_range' => 0,
-
             ],
         ]);
         $t->data['id'] = $id;
@@ -130,7 +129,6 @@ class Templates
                     'default' => 0,
                     'min_range' => 0,
                     'max_range' => 2,
-
                 ],
             ]
         ); // indexed from 0
@@ -141,13 +139,13 @@ class Templates
             'SP' => 'id="tab-3" href="' . self::getFullUrl('serviceProviders.php') . '?lastDays=' . $lastDays . '"',
         ];
         $mode = $config->getMode();
-        if ($mode !== Config::MODE_PROXY) {
+        if (Config::MODE_PROXY !== $mode) {
             $t->data['tabsAttributes'][$mode] = 'class="hidden" ' . $t->data['tabsAttributes'][$mode];
         }
 
         $t->data['header'] = $t->t('{proxystatistics:stats:statistics_header}');
         $instanceName = Configuration::getInstance()->getString(self::INSTANCE_NAME, null);
-        if ($instanceName !== null) {
+        if (null !== $instanceName) {
             $t->data['header'] = $instanceName . ' ' . $t->data['header'];
         } else {
             Logger::warning('Missing configuration: config.php - instance_name is not set.');
@@ -190,7 +188,7 @@ class Templates
                 '!side_on' => $t->t('{proxystatistics:stats:chart_legend_side_on_' . $side . '}'),
             ]
         );
-        if ($side === Config::MODE_SP && $mode !== Config::MODE_SP) {
+        if (Config::MODE_SP === $side && Config::MODE_SP !== $mode) {
             echo ' ';
             echo $t->t(
                 '{proxystatistics:stats:first_access_only}',
@@ -209,7 +207,7 @@ class Templates
         $mode = Config::getInstance()->getMode();
         $t->data['mode'] = $mode;
         $t->data['summaryGraphs'] = [];
-        if ($mode === Config::MODE_PROXY || $mode === Config::MODE_MULTI_IDP) {
+        if (Config::MODE_PROXY === $mode || Config::MODE_MULTI_IDP === $mode) {
             foreach (Config::SIDES as $side) {
                 $t->data['summaryGraphs'][$side] = [];
                 $t->data['summaryGraphs'][$side]['Providers'] = 'col-md-6 graph';
@@ -242,7 +240,6 @@ class Templates
                 'options' => [
                     'default' => 0,
                     'min_range' => 0,
-
                 ],
             ]
         );

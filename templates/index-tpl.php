@@ -10,17 +10,17 @@ $this->includeAtTemplateBase('includes/header.php');
 <div id="tabdiv" data-activetab="<?php echo htmlspecialchars(strval($this->data['tab'])); ?>">
     <ul class="tabset_tabs" width="100px">
         <li>
-            <a <?php echo $this->data['tabsAttributes']['PROXY'] ?>>
+            <a <?php echo $this->data['tabsAttributes']['PROXY']; ?>>
                 <?php echo $this->t('{proxystatistics:stats:summary}'); ?>
             </a>
         </li>
-        <?php foreach (Config::SIDES as $side) : ?>
+        <?php foreach (Config::SIDES as $side) { ?>
         <li>
-            <a <?php echo $this->data['tabsAttributes'][$side] ?>>
+            <a <?php echo $this->data['tabsAttributes'][$side]; ?>>
                 <?php echo $this->t('{proxystatistics:stats:side' . $side . 'Detail}'); ?>
             </a>
         </li>
-        <?php endforeach; ?>
+        <?php } ?>
     </ul>
 </div>
 

@@ -8,12 +8,13 @@ use SimpleSAML\Module\proxystatistics\DatabaseCommand;
 /**
  * Hook to run a cron job.
  *
- * @param array $croninfo  Output
+ * @param array $croninfo Output
  */
 function proxystatistics_hook_cron(&$croninfo)
 {
-    if ($croninfo['tag'] !== 'daily') {
+    if ('daily' !== $croninfo['tag']) {
         Logger::debug('cron [proxystatistics]: Skipping cron in cron tag [' . $croninfo['tag'] . '] ');
+
         return;
     }
 

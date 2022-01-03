@@ -18,13 +18,13 @@ use SimpleSAML\Module\proxystatistics\Templates;
 </div>
 
 <div class="row tableMaxHeight">
-    <?php foreach (Config::SIDES as $side) : ?>
-        <div class="<?php echo $this->data['summaryGraphs'][$side]['Providers'] ?>">
+    <?php foreach (Config::SIDES as $side) { ?>
+        <div class="<?php echo $this->data['summaryGraphs'][$side]['Providers']; ?>">
             <h2>
                 <?php echo $this->t('{proxystatistics:stats:side_' . $side . 's}'); ?>
             </h2>
             <div class="row">
-                <div class="<?php echo $this->data['summaryGraphs'][$side]['ProvidersLegend'] ?>">
+                <div class="<?php echo $this->data['summaryGraphs'][$side]['ProvidersLegend']; ?>">
                     <div class="legend">
                         <div id="summary<?php echo $side; ?>">
                             <?php Templates::showLegend($this, $side); ?>
@@ -33,10 +33,10 @@ use SimpleSAML\Module\proxystatistics\Templates;
                 </div>
             </div>
             <div class="row">
-                <div class="<?php echo $this->data['summaryGraphs'][$side]['ProvidersGraph'] ?>">
+                <div class="<?php echo $this->data['summaryGraphs'][$side]['ProvidersGraph']; ?>">
                     <?php Templates::pieChart($side . 'Chart'); ?>
                 </div>
             </div>
         </div>
-    <?php endforeach; ?>
+    <?php } ?>
 </div>
