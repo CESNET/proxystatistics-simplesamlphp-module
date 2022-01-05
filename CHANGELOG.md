@@ -1,3 +1,15 @@
+# [7.0.0](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v6.0.0...v7.0.0) (2022-01-05)
+
+
+### chore
+
+* add missing composer dependencies ([2c9c3b9](https://github.com/CESNET/proxystatistics-simplesamlphp-module/commit/2c9c3b9f920429d48b6ae15f39bcaf555fb80b90))
+
+
+### BREAKING CHANGES
+
+* SSP 1.19 is required
+
 # [6.0.0](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v5.0.0...v6.0.0) (2021-11-22)
 
 
