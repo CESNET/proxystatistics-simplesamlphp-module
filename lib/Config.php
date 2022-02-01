@@ -16,15 +16,21 @@ class Config
 
     public const MODE_MULTI_IDP = 'MULTI_IDP';
 
-    public const SIDES = [self::MODE_IDP, self::MODE_SP];
-
     public const MODE_PROXY = 'PROXY';
 
+    public const KNOWN_MODES = [self::MODE_IDP, self::MODE_SP, self::MODE_MULTI_IDP, self::MODE_PROXY];
+
+    public const SIDES = [self::MODE_IDP, self::MODE_SP];
+
     private const STORE = 'store';
+
+    private const TABLES = 'tables';
 
     private const MODE = 'mode';
 
     private const USER_ID_ATTRIBUTE = 'userIdAttribute';
+
+    private const SOURCE_IDP_ENTITY_ID_ATTRIBUTE = 'sourceIdpEntityIdAttribute';
 
     private const REQUIRE_AUTH_SOURCE = 'requireAuth.source';
 
@@ -34,6 +40,8 @@ class Config
 
     private $store;
 
+    private $tables;
+
     private $mode;
 
     private static $instance;
@@ -42,15 +50,15 @@ class Config
     {
         $this->config = Configuration::getConfig(self::CONFIG_FILE_NAME);
         $this->store = $this->config->getConfigItem(self::STORE, null);
-        $this->tables = $this->config->getArray('tables', []);
-        $this->mode = $this->config->getValueValidate(self::MODE, ['PROXY', 'IDP', 'SP', 'MULTI_IDP'], 'PROXY');
+        $this->tables = $this->config->getArray(self::TABLES, []);
+        $this->mode = $this->config->getValueValidate(self::MODE, self::KNOWN_MODES, self::MODE_PROXY);
     }
 
     private function __clone()
     {
     }
 
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (null === self::$instance) {
             self::$instance = new self();
@@ -79,9 +87,14 @@ class Config
         return $this->config->getString(self::USER_ID_ATTRIBUTE, 'uid');
     }
 
+    public function getSourceIdpEntityIdAttribute()
+    {
+        return $this->config->getString(self::SOURCE_IDP_ENTITY_ID_ATTRIBUTE, '');
+    }
+
     public function getSideInfo($side)
     {
-        assert(in_array($side, [self::SIDES], true));
+        assert(in_array($side, self::SIDES, true));
 
         return array_merge([
             'name' => '',

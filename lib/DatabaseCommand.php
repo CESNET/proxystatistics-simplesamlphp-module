@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace SimpleSAML\Module\proxystatistics;
 
 use PDO;
+use PDOStatement;
 use SimpleSAML\Database;
 use SimpleSAML\Logger;
 
 class DatabaseCommand
 {
-    public const TABLE_SUM = 'statistics_sums';
+    private const DEBUG_PREFIX = 'proxystatistics:DatabaseCommand - ';
+
+    private const TABLE_SUM = 'statistics_sums';
 
     private const TABLE_PER_USER = 'statistics_per_user';
 
@@ -27,6 +30,10 @@ class DatabaseCommand
         self::TABLE_IDP => 'idp_id',
         self::TABLE_SP => 'sp_id',
     ];
+
+    private const KEY_ID = 'id';
+
+    private const KEY_NAME = 'name';
 
     private $tables = [
         self::TABLE_SUM => self::TABLE_SUM,
@@ -47,41 +54,44 @@ class DatabaseCommand
     {
         $this->config = Config::getInstance();
         $this->conn = Database::getInstance($this->config->getStore());
-        if ('pgsql' === $this->conn->getDriver()) {
+        if ($this->isPostgreSql()) {
             $this->escape_char = '"';
+        } elseif ($this->isMySql()) {
+            $this->escape_char = '`';
         }
         $this->tables = array_merge($this->tables, $this->config->getTables());
         $this->mode = $this->config->getMode();
     }
 
-    public static function prependColon($str)
+    public static function prependColon($str): string
     {
         return ':' . $str;
     }
 
-    public function insertLogin(&$request, &$date)
+    public function insertLogin($request, $date)
     {
         $entities = $this->getEntities($request);
 
         foreach (Config::SIDES as $side) {
-            if (empty($entities[$side]['id'])) {
-                Logger::error('idpEntityId or spEntityId is empty and login log was not inserted into the database.');
+            if (empty($entities[$side][self::KEY_ID])) {
+                Logger::error(
+                    self::DEBUG_PREFIX . 'idpEntityId or spEntityId is empty and login log was not inserted into the database.'
+                );
 
                 return;
             }
         }
 
-        $idAttribute = $this->config->getIdAttribute();
-        $userId = isset($request['Attributes'][$idAttribute]) ? $request['Attributes'][$idAttribute][0] : '';
+        $userId = $this->getUserId($request);
 
         $ids = [];
         foreach (self::TABLE_SIDES as $side => $table) {
-            $tableId = self::TABLE_IDS[$table];
-            $ids[$tableId] = $this->getIdFromIdentifier($table, $entities[$side], $tableId);
+            $tableIdColumn = self::TABLE_IDS[$table];
+            $ids[$tableIdColumn] = $this->getIdFromIdentifier($table, $entities[$side], $tableIdColumn);
         }
 
         if (false === $this->writeLogin($date, $ids, $userId)) {
-            Logger::error('The login log was not inserted.');
+            Logger::error(self::DEBUG_PREFIX . 'The login log was not inserted.');
         }
     }
 
@@ -102,10 +112,14 @@ class DatabaseCommand
     public function getLoginCountPerDay($days, $where = [])
     {
         $params = [];
-        if ('pgsql' === $this->conn->getDriver()) {
+        if ($this->isPostgreSql()) {
             $query = "SELECT EXTRACT(epoch FROM TO_DATE(CONCAT(year,'-',month,'-',day), 'YYYY-MM-DD')) AS day, ";
-        } else {
+        } elseif ($this->isMySql()) {
             $query = "SELECT UNIX_TIMESTAMP(STR_TO_DATE(CONCAT(year,'-',month,'-',day), '%Y-%m-%d')) AS day, ";
+        } else {
+            Logger::warning(self::DEBUG_PREFIX . 'Unsupported datastore');
+
+            return false;
         }
         $query .= 'logins AS count, users ' .
                  'FROM ' . $this->tables[self::TABLE_SUM] . ' ' .
@@ -149,7 +163,7 @@ class DatabaseCommand
             foreach ([self::TABLE_IDS[self::TABLE_SP], null] as $sp_id) {
                 $ids = [$idp_id, $sp_id];
                 $msg = 'Aggregating daily statistics per ' . implode(' and ', array_filter($ids));
-                Logger::info($msg);
+                Logger::info(self::DEBUG_PREFIX . $msg);
                 $query = 'INSERT INTO ' . $this->tables[self::TABLE_SUM] . ' '
                     . '(' . $this->escape_cols(['year', 'month', 'day', 'idp_id', 'sp_id', 'logins', 'users']) . ') '
                     . 'SELECT EXTRACT(YEAR FROM ' . $this->escape_col(
@@ -164,16 +178,20 @@ class DatabaseCommand
                     . 'FROM ' . $this->tables[self::TABLE_PER_USER] . ' '
                     . 'WHERE day<DATE(NOW()) '
                     . 'GROUP BY ' . $this->getAggregateGroupBy($ids) . ' ';
-                if ('pgsql' === $this->conn->getDriver()) {
+                if ($this->isPostgreSql()) {
                     $query .= 'ON CONFLICT (' . $this->escape_cols(
                         ['year', 'month', 'day', 'idp_id', 'sp_id']
                     ) . ') DO NOTHING;';
-                } else {
+                } elseif ($this->isMySql()) {
                     $query .= 'ON DUPLICATE KEY UPDATE id=id;';
+                } else {
+                    Logger::warning(self::DEBUG_PREFIX . 'Unsupported datastore');
+
+                    return;
                 }
                 // do nothing if row already exists
                 if (!$this->conn->write($query)) {
-                    Logger::warning($msg . ' failed');
+                    Logger::warning(self::DEBUG_PREFIX . $msg . ' failed');
                 }
             }
         }
@@ -181,12 +199,12 @@ class DatabaseCommand
         $keepPerUserDays = $this->config->getKeepPerUser();
 
         $msg = 'Deleting detailed statistics';
-        Logger::info($msg);
-        if ('pgsql' === $this->conn->getDriver()) {
+        Logger::info(self::DEBUG_PREFIX . $msg);
+        if ($this->isPostgreSql()) {
             $make_date = 'MAKE_DATE(' . $this->escape_cols(['year', 'month', 'day']) . ')';
             $date_clause = sprintf('CURRENT_DATE - INTERVAL \'%s DAY\' ', $keepPerUserDays);
             $params = [];
-        } else {
+        } elseif ($this->isMySql()) {
             $make_date = 'STR_TO_DATE(CONCAT(' . $this->escape_col('year') . ",'-'," . $this->escape_col(
                 'month'
             ) . ",'-'," . $this->escape_col('day') . "), '%Y-%m-%d')";
@@ -194,6 +212,10 @@ class DatabaseCommand
             $params = [
                 'days' => $keepPerUserDays,
             ];
+        } else {
+            Logger::warning(self::DEBUG_PREFIX . 'Unsupported datastore');
+
+            return;
         }
         $query = 'DELETE FROM ' . $this->tables[self::TABLE_PER_USER] . ' WHERE ' . $this->escape_col(
             'day'
@@ -204,16 +226,16 @@ class DatabaseCommand
         if (
             !$this->conn->write($query, $params)
         ) {
-            Logger::warning($msg . ' failed');
+            Logger::warning(self::DEBUG_PREFIX . $msg . ' failed');
         }
     }
 
-    private function escape_col($col_name)
+    private function escape_col($col_name): string
     {
         return $this->escape_char . $col_name . $this->escape_char;
     }
 
-    private function escape_cols($col_names)
+    private function escape_cols($col_names): string
     {
         return $this->escape_char . implode(
             $this->escape_char . ',' . $this->escape_char,
@@ -221,7 +243,7 @@ class DatabaseCommand
         ) . $this->escape_char;
     }
 
-    private function read($query, $params)
+    private function read($query, $params): PDOStatement
     {
         return $this->conn->read($query, $params);
     }
@@ -251,10 +273,13 @@ class DatabaseCommand
     private function writeLogin($date, $ids, $user)
     {
         if (empty($user)) {
-            Logger::warning('user is unknown, cannot insert login');
+            Logger::warning(self::DEBUG_PREFIX . 'user is unknown, cannot insert login');
+
             return false;
-        } else if (empty($ids[self::TABLE_IDS[self::TABLE_IDP]]) || empty($ids[self::TABLE_IDS[self::TABLE_SP]])) {
-            Logger::warning('no IDP_ID or SP_ID has been provided, cannot insert login');
+        }
+        if (empty($ids[self::TABLE_IDS[self::TABLE_IDP]]) || empty($ids[self::TABLE_IDS[self::TABLE_SP]])) {
+            Logger::warning(self::DEBUG_PREFIX . 'no IDP_ID or SP_ID has been provided, cannot insert login');
+
             return false;
         }
         $params = array_merge($ids, [
@@ -266,47 +291,47 @@ class DatabaseCommand
         $placeholders = array_map(['self', 'prependColon'], $fields);
         $query = 'INSERT INTO ' . $this->tables[self::TABLE_PER_USER] . ' (' . $this->escape_cols($fields) . ')' .
                  ' VALUES (' . implode(', ', $placeholders) . ') ';
-        if ('pgsql' === $this->conn->getDriver()) {
+        if ($this->isPostgreSql()) {
             $query .= 'ON CONFLICT (' . $this->escape_cols(
                 ['day', 'idp_id', 'sp_id', 'user']
             ) . ') DO UPDATE SET "logins" = ' . $this->tables[self::TABLE_PER_USER] . '.logins + 1;';
-        } else {
+        } elseif ($this->isMySql()) {
             $query .= 'ON DUPLICATE KEY UPDATE logins = logins + 1;';
+        } else {
+            Logger::warning(self::DEBUG_PREFIX . 'Unsupported datastore');
+
+            return false;
         }
 
         return $this->conn->write($query, $params);
     }
 
-    private function getEntities($request)
+    private function getEntities($request): array
     {
         $entities = [
             Config::MODE_IDP => [],
             Config::MODE_SP => [],
         ];
         if (Config::MODE_IDP !== $this->mode && Config::MODE_MULTI_IDP !== $this->mode) {
-            $entities[Config::MODE_IDP]['id'] = $request['saml:sp:IdP'];
-            $entities[Config::MODE_IDP]['name'] = $request['Attributes']['sourceIdPName'][0];
+            $entities[Config::MODE_IDP][self::KEY_ID] = $this->getIdpIdentifier($request);
+            $entities[Config::MODE_IDP][self::KEY_NAME] = $this->getIdpName($request);
         }
         if (Config::MODE_SP !== $this->mode) {
-            $entities[Config::MODE_SP]['id'] = $request['Destination']['entityid'];
-            if (isset($request['Destination']['UIInfo']['DisplayName']['en'])) {
-                $entities[Config::MODE_SP]['name'] = $request['Destination']['UIInfo']['DisplayName']['en'];
-            } else {
-                $entities[Config::MODE_SP]['name'] = $request['Destination']['name']['en'] ?? '';
-            }
+            $entities[Config::MODE_SP][self::KEY_ID] = $this->getSpIdentifier($request);
+            $entities[Config::MODE_SP][self::KEY_NAME] = $this->getSpName($request);
         }
 
         if (Config::MODE_PROXY !== $this->mode && Config::MODE_MULTI_IDP !== $this->mode) {
             $entities[$this->mode] = $this->config->getSideInfo($this->mode);
-            if (empty($entities[$this->mode]['id']) || empty($entities[$this->mode]['name'])) {
-                Logger::error('Invalid configuration (id, name) for ' . $this->mode);
+            if (empty($entities[$this->mode][self::KEY_ID]) || empty($entities[$this->mode][self::KEY_NAME])) {
+                Logger::error(self::DEBUG_PREFIX . 'Invalid configuration (id, name) for ' . $this->mode);
             }
         }
 
         if (Config::MODE_MULTI_IDP === $this->mode) {
             $entities[Config::MODE_IDP] = $this->config->getSideInfo(Config::MODE_IDP);
-            if (empty($entities[Config::MODE_IDP]['id']) || empty($entities[Config::MODE_IDP]['name'])) {
-                Logger::error('Invalid configuration (id, name) for ' . $this->mode);
+            if (empty($entities[Config::MODE_IDP][self::KEY_ID]) || empty($entities[Config::MODE_IDP][self::KEY_NAME])) {
+                Logger::error(self::DEBUG_PREFIX . 'Invalid configuration (id, name) for ' . $this->mode);
             }
         }
 
@@ -315,26 +340,34 @@ class DatabaseCommand
 
     private function getIdFromIdentifier($table, $entity, $idColumn)
     {
-        $identifier = $entity['id'];
-        $name = $entity['name'];
-        $query = 'INSERT INTO ' . $this->tables[$table] . '(identifier, name) VALUES (:identifier, :name1) ';
-        if ('pgsql' === $this->conn->getDriver()) {
+        $tableName = $this->tables[$table];
+        $identifier = $entity[self::KEY_ID];
+        $name = $entity[self::KEY_NAME];
+        $query = 'INSERT INTO ' . $tableName . '(identifier, name) VALUES (:identifier, :name1) ';
+        if ($this->isPostgreSql()) {
             $query .= 'ON CONFLICT (identifier) DO UPDATE SET name = :name2;';
-        } else {
+        } elseif ($this->isMySql()) {
             $query .= 'ON DUPLICATE KEY UPDATE name = :name2';
+        } else {
+            Logger::warning(self::DEBUG_PREFIX . 'Unsupported datastore');
+
+            return null;
         }
-        $this->conn->write($query, [
+        $written = $this->conn->write($query, [
             'identifier' => $identifier,
             'name1' => $name,
             'name2' => $name,
         ]);
 
-        return $this->read('SELECT ' . $idColumn . ' FROM ' . $this->tables[$table]
-            . ' WHERE identifier=:identifier', [
+        if (is_bool($written) && false === $written) {
+            Logger::error(self::DEBUG_PREFIX . 'Failed to insert or update entry in ' . $tableName . ': identifier - '
+                . $identifier . ', name - ' . $name);
+        }
+
+        return $this->read('SELECT ' . $idColumn . ' FROM ' . $tableName
+            . ' WHERE identifier = :identifier', [
                 'identifier' => $identifier,
-            ])
-            ->fetchColumn()
-        ;
+            ])->fetchColumn();
     }
 
     private function addDaysRange($days, &$query, &$params, $not = false)
@@ -345,27 +378,33 @@ class DatabaseCommand
             } else {
                 $query .= 'AND';
             }
-            if ('pgsql' === $this->conn->getDriver()) {
+            if ($this->isPostgreSql()) {
                 $query .= ' MAKE_DATE(year,month,day) ';
-            } else {
+            } elseif ($this->isMySql()) {
                 $query .= " CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) ";
+            } else {
+                Logger::warning(self::DEBUG_PREFIX . 'Unsupported datastore');
+
+                return;
             }
             if ($not) {
                 $query .= 'NOT ';
             }
-            if ('pgsql' === $this->conn->getDriver()) {
+            if ($this->isPostgreSql()) {
                 if (!is_int($days) && !ctype_digit($days)) {
                     throw new \Exception('days have to be an integer');
                 }
                 $query .= sprintf('BETWEEN CURRENT_DATE - INTERVAL \'%s DAY\' AND CURRENT_DATE ', $days);
-            } else {
+            } elseif ($this->isMySql()) {
                 $query .= 'BETWEEN CURDATE() - INTERVAL :days DAY AND CURDATE() ';
                 $params['days'] = $days;
+            } else {
+                Logger::warning(self::DEBUG_PREFIX . 'Unsupported datastore');
             }
         }
     }
 
-    private function getAggregateGroupBy($ids)
+    private function getAggregateGroupBy($ids): string
     {
         $columns = ['day'];
         foreach ($ids as $id) {
@@ -375,5 +414,52 @@ class DatabaseCommand
         }
 
         return $this->escape_cols($columns);
+    }
+
+    private function isPostgreSql(): bool
+    {
+        return 'pgsql' === $this->conn->getDriver();
+    }
+
+    private function isMySql(): bool
+    {
+        return 'mysql' === $this->conn->getDriver();
+    }
+
+    private function getIdpIdentifier($request)
+    {
+        $sourceIdpEntityIdAttribute = $this->config->getSourceIdpEntityIdAttribute();
+        if (!empty($sourceIdpEntityIdAttribute) && !empty($request['Attributes'][$sourceIdpEntityIdAttribute][0])) {
+            return $request['Attributes'][$sourceIdpEntityIdAttribute][0];
+        }
+
+        return $request['saml:sp:IdP'];
+    }
+
+    private function getUserId($request)
+    {
+        $idAttribute = $this->config->getIdAttribute();
+
+        return isset($request['Attributes'][$idAttribute]) ? $request['Attributes'][$idAttribute][0] : '';
+    }
+
+    private function getIdpName($request)
+    {
+        return $request['Attributes']['sourceIdPName'][0];
+    }
+
+    private function getSpIdentifier($request)
+    {
+        return $request['Destination']['entityid'];
+    }
+
+    private function getSpName($request)
+    {
+        $displayName = $request['Destination']['UIInfo']['DisplayName']['en'] ?? '';
+        if (empty($displayName)) {
+            $displayName = $request['Destination']['name']['en'] ?? '';
+        }
+
+        return$displayName;
     }
 }
