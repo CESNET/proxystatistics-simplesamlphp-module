@@ -6,6 +6,7 @@ namespace SimpleSAML\Module\proxystatistics\Auth\Process;
 
 use DateTime;
 use SimpleSAML\Auth\ProcessingFilter;
+use SimpleSAML\Logger;
 use SimpleSAML\Module\proxystatistics\DatabaseCommand;
 
 class Statistics extends ProcessingFilter
@@ -19,6 +20,10 @@ class Statistics extends ProcessingFilter
     {
         $dateTime = new DateTime();
         $dbCmd = new DatabaseCommand();
-        $dbCmd->insertLogin($request, $dateTime);
+        try {
+            $dbCmd->insertLogin($request, $dateTime);
+        } catch (\Exception $ex) {
+            Logger::error('Caught exception while inserting login into statistics: ' . $ex->getMessage());
+        }
     }
 }

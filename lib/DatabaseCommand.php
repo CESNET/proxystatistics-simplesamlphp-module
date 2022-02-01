@@ -251,6 +251,10 @@ class DatabaseCommand
     private function writeLogin($date, $ids, $user)
     {
         if (empty($user)) {
+            Logger::warning('user is unknown, cannot insert login');
+            return false;
+        } else if (empty($ids[self::TABLE_IDS[self::TABLE_IDP]]) || empty($ids[self::TABLE_IDS[self::TABLE_SP]])) {
+            Logger::warning('no IDP_ID or SP_ID has been provided, cannot insert login');
             return false;
         }
         $params = array_merge($ids, [
