@@ -1,3 +1,10 @@
+## [7.0.1](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v7.0.0...v7.0.1) (2022-02-07)
+
+
+### Bug Fixes
+
+* Fix migration script for MySQL ([8e215b8](https://github.com/CESNET/proxystatistics-simplesamlphp-module/commit/8e215b85875d9720e8062d40f58aeb2754388b43))
+
 # [7.0.0](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v6.0.0...v7.0.0) (2022-01-05)
 
 
