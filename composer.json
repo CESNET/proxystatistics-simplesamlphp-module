@@ -17,6 +17,9 @@
   "config": {
     "platform": {
       "php": "7.4"
+    },
+    "allow-plugins": {
+      "simplesamlphp/composer-module-installer": true
     }
   },
   "require": {
@@ -25,7 +28,7 @@
     "ext-filter": "*",
     "ext-json": "*",
     "ext-PDO": "*",
-    "simplesamlphp/simplesamlphp": "^1.19"
+    "simplesamlphp/simplesamlphp": "^1.19.2"
   },
   "suggest": {
     "cesnet/simplesamlphp-module-perun" : "for logging that a user accessed a service",
