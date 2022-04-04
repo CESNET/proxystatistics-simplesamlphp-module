@@ -1,3 +1,10 @@
+## [7.0.2](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v7.0.1...v7.0.2) (2022-04-04)
+
+
+### Bug Fixes
+
+* **deps:** minimum SSP version is 1.19.2 ([bdfead6](https://github.com/CESNET/proxystatistics-simplesamlphp-module/commit/bdfead63948b3fb28799e952e52becc55589db19))
+
 ## [7.0.1](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v7.0.0...v7.0.1) (2022-02-07)
 
 
