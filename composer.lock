@@ -4760,16 +4760,16 @@
         },
         {
             "name": "twig/twig",
-            "version": "v2.14.13",
+            "version": "v2.15.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "66856cd0459df3dc97d32077a98454dc2a0ee75a"
+                "reference": "3b7cedb2f736899a7dbd0ba3d6da335a015f5cc4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/66856cd0459df3dc97d32077a98454dc2a0ee75a",
-                "reference": "66856cd0459df3dc97d32077a98454dc2a0ee75a",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/3b7cedb2f736899a7dbd0ba3d6da335a015f5cc4",
+                "reference": "3b7cedb2f736899a7dbd0ba3d6da335a015f5cc4",
                 "shasum": ""
             },
             "require": {
@@ -4785,7 +4785,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.14-dev"
+                    "dev-master": "2.15-dev"
                 }
             },
             "autoload": {
@@ -4824,7 +4824,7 @@
             ],
             "support": {
                 "issues": "https://github.com/twigphp/Twig/issues",
-                "source": "https://github.com/twigphp/Twig/tree/v2.14.13"
+                "source": "https://github.com/twigphp/Twig/tree/v2.15.1"
             },
             "funding": [
                 {
@@ -4836,7 +4836,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-04-06T06:45:17+00:00"
+            "time": "2022-05-17T05:46:24+00:00"
         },
         {
             "name": "webmozart/assert",
@@ -5004,20 +5004,20 @@
         },
         {
             "name": "symplify/easy-coding-standard",
-            "version": "10.2.2",
+            "version": "10.2.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symplify/easy-coding-standard.git",
-                "reference": "d847795500b929f68ed115357658122d64017f77"
+                "reference": "e34a105876b0640e70c584d75adaf9c0b03cf0f3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symplify/easy-coding-standard/zipball/d847795500b929f68ed115357658122d64017f77",
-                "reference": "d847795500b929f68ed115357658122d64017f77",
+                "url": "https://api.github.com/repos/symplify/easy-coding-standard/zipball/e34a105876b0640e70c584d75adaf9c0b03cf0f3",
+                "reference": "e34a105876b0640e70c584d75adaf9c0b03cf0f3",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.1"
+                "php": ">=7.2"
             },
             "conflict": {
                 "friendsofphp/php-cs-fixer": "<3.0",
@@ -5043,7 +5043,7 @@
             ],
             "description": "Prefixed scoped version of ECS package",
             "support": {
-                "source": "https://github.com/symplify/easy-coding-standard/tree/10.2.2"
+                "source": "https://github.com/symplify/easy-coding-standard/tree/10.2.7"
             },
             "funding": [
                 {
@@ -5055,7 +5055,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-04-17T10:41:19+00:00"
+            "time": "2022-05-21T11:14:40+00:00"
         }
     ],
     "aliases": [],
