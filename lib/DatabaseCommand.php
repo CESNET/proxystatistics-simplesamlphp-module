@@ -71,8 +71,7 @@ class DatabaseCommand
             }
         }
 
-        $idAttribute = $this->config->getIdAttribute();
-        $userId = isset($request['Attributes'][$idAttribute]) ? $request['Attributes'][$idAttribute][0] : '';
+        $userId = $this->getUserId($request);
 
         $ids = [];
         foreach (self::TABLE_SIDES as $side => $table) {
@@ -273,23 +272,19 @@ class DatabaseCommand
         return $this->conn->write($query, $params);
     }
 
-    private function getEntities($request)
+    private function getEntities($request): array
     {
         $entities = [
             Config::MODE_IDP => [],
             Config::MODE_SP => [],
         ];
         if (Config::MODE_IDP !== $this->mode && Config::MODE_MULTI_IDP !== $this->mode) {
-            $entities[Config::MODE_IDP]['id'] = $request['saml:sp:IdP'];
-            $entities[Config::MODE_IDP]['name'] = $request['Attributes']['sourceIdPName'][0];
+            $entities[Config::MODE_IDP]['id'] = $this->getIdpIdentifier($request);
+            $entities[Config::MODE_IDP]['name'] = $this->getIdpName($request);
         }
         if (Config::MODE_SP !== $this->mode) {
-            $entities[Config::MODE_SP]['id'] = $request['Destination']['entityid'];
-            if (isset($request['Destination']['UIInfo']['DisplayName']['en'])) {
-                $entities[Config::MODE_SP]['name'] = $request['Destination']['UIInfo']['DisplayName']['en'];
-            } else {
-                $entities[Config::MODE_SP]['name'] = $request['Destination']['name']['en'] ?? '';
-            }
+            $entities[Config::MODE_SP]['id'] = $this->getSpIdentifier($request);
+            $entities[Config::MODE_SP]['name'] = $this->getSpName($request);
         }
 
         if (Config::MODE_PROXY !== $this->mode && Config::MODE_MULTI_IDP !== $this->mode) {
@@ -371,5 +366,42 @@ class DatabaseCommand
         }
 
         return $this->escape_cols($columns);
+    }
+
+    private function getIdpIdentifier($request)
+    {
+        $sourceIdpEntityIdAttribute = $this->config->getSourceIdpEntityIdAttribute();
+        if (!empty($sourceIdpEntityIdAttribute) && !empty($request['Attributes'][$sourceIdpEntityIdAttribute][0])) {
+            return $request['Attributes'][$sourceIdpEntityIdAttribute][0];
+        }
+
+        return $request['saml:sp:IdP'];
+    }
+
+    private function getUserId($request)
+    {
+        $idAttribute = $this->config->getIdAttribute();
+
+        return isset($request['Attributes'][$idAttribute]) ? $request['Attributes'][$idAttribute][0] : '';
+    }
+
+    private function getIdpName($request)
+    {
+        return $request['Attributes']['sourceIdPName'][0];
+    }
+
+    private function getSpIdentifier($request)
+    {
+        return $request['Destination']['entityid'];
+    }
+
+    private function getSpName($request)
+    {
+        $displayName = $request['Destination']['UIInfo']['DisplayName']['en'] ?? '';
+        if (empty($displayName)) {
+            $displayName = $request['Destination']['name']['en'] ?? '';
+        }
+
+        return$displayName;
     }
 }

@@ -63,6 +63,12 @@ $config = [
     //'userIdAttribute' => 'uid',
 
     /*
+     * Which attribute should be used for IdP Entity ID
+     * if left empty, it will be extracted from the request object.
+     */
+    //'sourceIdpEntityIdAttribute' => 'sourceIdpEntityID',
+
+    /*
      * Database table names. Default is to keep the name (as in `tables.sql`)
      */
     'tableNames' => [
