@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Module\proxystatistics;
 
+use DateTime;
 use Exception;
 use PDO;
 use PDOStatement;
@@ -13,6 +14,16 @@ use SimpleSAML\Logger;
 class DatabaseCommand
 {
     public const TABLE_SUM = 'statistics_sums';
+
+    public const API_USER_ID = 'userId';
+
+    public const API_SERVICE_NAME = 'serviceName';
+
+    public const API_SERVICE_IDENTIFIER = 'serviceIdentifier';
+
+    public const API_IDP_NAME = 'idpName';
+
+    public const API_IDP_IDENTIFIER = 'idpIdentifier';
 
     private const DEBUG_PREFIX = 'proxystatistics:DatabaseCommand - ';
 
@@ -66,21 +77,11 @@ class DatabaseCommand
         $this->mode = $this->config->getMode();
     }
 
-    public function insertLogin($request, &$date)
+    public function insertLoginFromFilter($request, $date)
     {
-        $entities = $this->prepareEntitiesData($request);
-
-        foreach (Config::SIDES as $side) {
-            if (empty($entities[$side][self::KEY_ID])) {
-                Logger::error(
-                    self::DEBUG_PREFIX . 'idpEntityId or spEntityId is empty and login log was not inserted into the database.'
-                );
-
-                return;
-            }
-        }
-
+        $entities = $this->getEntities($request);
         $userId = $this->getUserId($request);
+        $this->insertLogin($entities, $userId, $date);
 
         $ids = [];
         foreach (self::TABLE_SIDES as $side => $table) {
@@ -88,13 +89,25 @@ class DatabaseCommand
             $ids[$tableId] = $this->getEntityDbIdFromEntityIdentifier($table, $entities[$side], $tableId);
         }
 
-        if ($this->writeLogin($date, $ids, $userId) === false) {
+        if (!$this->writeLogin($date, $ids, $userId)) {
             Logger::error(self::DEBUG_PREFIX . 'login record has not been inserted (data \'' . json_encode([
                 'user' => $userId,
                 'ids' => $ids,
                 'date' => $date,
             ]) . '\'.');
         }
+    }
+
+    public function insertLoginFromApi($data, DateTime $date)
+    {
+        $userId = $data[self::API_USER_ID];
+        $serviceIdentifier = $data[self::API_SERVICE_IDENTIFIER];
+        $serviceName = $data[self::API_SERVICE_NAME];
+        $idpIdentifier = $data[self::API_IDP_IDENTIFIER];
+        $idpName = $data[self::API_IDP_NAME];
+
+        $entities = $this->prepareEntitiesStructure($idpIdentifier, $idpName, $serviceIdentifier, $serviceName);
+        $this->insertLogin($entities, $userId, $date);
     }
 
     public function getEntityNameByEntityIdentifier($side, $id)
@@ -165,21 +178,21 @@ class DatabaseCommand
                 $msg = 'Aggregating daily statistics per ' . implode(' and ', array_filter($ids));
                 Logger::info(self::DEBUG_PREFIX . $msg);
                 $query = 'INSERT INTO ' . $this->tables[self::TABLE_SUM] . ' '
-                    . '(' . $this->escape_cols(['year', 'month', 'day', 'idp_id', 'sp_id', 'logins', 'users']) . ') '
-                    . 'SELECT EXTRACT(YEAR FROM ' . $this->escape_col(
+                    . '(' . $this->escapeCols(['year', 'month', 'day', 'idp_id', 'sp_id', 'logins', 'users']) . ') '
+                    . 'SELECT EXTRACT(YEAR FROM ' . $this->escapeCol(
                         'day'
-                    ) . '), EXTRACT(MONTH FROM ' . $this->escape_col(
+                    ) . '), EXTRACT(MONTH FROM ' . $this->escapeCol(
                         'day'
-                    ) . '), EXTRACT(DAY FROM ' . $this->escape_col('day') . '), ';
+                    ) . '), EXTRACT(DAY FROM ' . $this->escapeCol('day') . '), ';
                 foreach ($ids as $id) {
                     $query .= ($id === null ? '0' : $id) . ',';
                 }
-                $query .= 'SUM(logins), COUNT(DISTINCT ' . $this->escape_col('user') . ') '
+                $query .= 'SUM(logins), COUNT(DISTINCT ' . $this->escapeCol('user') . ') '
                     . 'FROM ' . $this->tables[self::TABLE_PER_USER] . ' '
                     . 'WHERE day<DATE(NOW()) '
                     . 'GROUP BY ' . $this->getAggregateGroupBy($ids) . ' ';
                 if ($this->isPgsql()) {
-                    $query .= 'ON CONFLICT (' . $this->escape_cols(
+                    $query .= 'ON CONFLICT (' . $this->escapeCols(
                         ['year', 'month', 'day', 'idp_id', 'sp_id']
                     ) . ') DO NOTHING;';
                 } elseif ($this->isMysql()) {
@@ -199,13 +212,13 @@ class DatabaseCommand
         $msg = 'Deleting detailed statistics';
         Logger::info(self::DEBUG_PREFIX . $msg);
         if ($this->isPgsql()) {
-            $make_date = 'MAKE_DATE(' . $this->escape_cols(['year', 'month', 'day']) . ')';
+            $make_date = 'MAKE_DATE(' . $this->escapeCols(['year', 'month', 'day']) . ')';
             $date_clause = sprintf('CURRENT_DATE - INTERVAL \'%s DAY\' ', $keepPerUserDays);
             $params = [];
         } elseif ($this->isMysql()) {
-            $make_date = 'STR_TO_DATE(CONCAT(' . $this->escape_col('year') . ",'-'," . $this->escape_col(
+            $make_date = 'STR_TO_DATE(CONCAT(' . $this->escapeCol('year') . ",'-'," . $this->escapeCol(
                 'month'
-            ) . ",'-'," . $this->escape_col('day') . "), '%Y-%m-%d')";
+            ) . ",'-'," . $this->escapeCol('day') . "), '%Y-%m-%d')";
             $date_clause = 'CURDATE() - INTERVAL :days DAY';
             $params = [
                 'days' => $keepPerUserDays,
@@ -213,10 +226,10 @@ class DatabaseCommand
         } else {
             $this->unknownDriver();
         }
-        $query = 'DELETE FROM ' . $this->tables[self::TABLE_PER_USER] . ' WHERE ' . $this->escape_col(
+        $query = 'DELETE FROM ' . $this->tables[self::TABLE_PER_USER] . ' WHERE ' . $this->escapeCol(
             'day'
         ) . ' < ' . $date_clause
-        . ' AND ' . $this->escape_col(
+        . ' AND ' . $this->escapeCol(
             'day'
         ) . ' IN (SELECT ' . $make_date . ' FROM ' . $this->tables[self::TABLE_SUM] . ')';
         $written = $this->conn->write($query, $params);
@@ -229,9 +242,32 @@ class DatabaseCommand
         }
     }
 
-    public static function prependColon($str): string
+    private function insertLogin($entities, $userId, $date)
     {
-        return ':' . $str;
+        foreach (Config::SIDES as $side) {
+            if (empty($entities[$side]['id'])) {
+                Logger::error(
+                    self::DEBUG_PREFIX . 'idpEntityId or spEntityId is empty and login log was not inserted into the database.'
+                );
+
+                return;
+            }
+        }
+
+        $ids = [];
+        foreach (self::TABLE_SIDES as $side => $table) {
+            $tableIdColumn = self::TABLE_IDS[$table];
+            $ids[$tableIdColumn] = $this->getIdFromIdentifier($table, $entities[$side], $tableIdColumn);
+        }
+
+        if ($this->writeLogin($date, $ids, $userId) === false) {
+            Logger::error(self::DEBUG_PREFIX . 'The login log was not inserted.');
+        }
+    }
+
+    private function escapeCol($col_name): string
+    {
+        return $this->escape_char . $col_name . $this->escape_char;
     }
 
     private function writeLogin($date, $ids, $user): bool
@@ -255,10 +291,10 @@ class DatabaseCommand
         ]);
         $fields = array_keys($params);
         $placeholders = array_map(['self', 'prependColon'], $fields);
-        $query = 'INSERT INTO ' . $this->tables[self::TABLE_PER_USER] . ' (' . $this->escape_cols($fields) . ')' .
+        $query = 'INSERT INTO ' . $this->tables[self::TABLE_PER_USER] . ' (' . $this->escapeCols($fields) . ')' .
             ' VALUES (' . implode(', ', $placeholders) . ') ';
         if ($this->isPgsql()) {
-            $query .= 'ON CONFLICT (' . $this->escape_cols(
+            $query .= 'ON CONFLICT (' . $this->escapeCols(
                 ['day', 'idp_id', 'sp_id', 'user']
             ) . ') DO UPDATE SET "logins" = ' . $this->tables[self::TABLE_PER_USER] . '.logins + 1;';
         } elseif ($this->isMysql()) {
@@ -280,38 +316,6 @@ class DatabaseCommand
         }
 
         return true;
-    }
-
-    private function prepareEntitiesData($request): array
-    {
-        $entities = [
-            Config::MODE_IDP => [],
-            Config::MODE_SP => [],
-        ];
-        if ($this->mode !== Config::MODE_IDP && $this->mode !== Config::MODE_MULTI_IDP) {
-            $entities[Config::MODE_IDP][self::KEY_ID] = $this->getIdpIdentifier($request);
-            $entities[Config::MODE_IDP][self::KEY_NAME] = $this->getIdpName($request);
-        }
-        if ($this->mode !== Config::MODE_SP) {
-            $entities[Config::MODE_SP][self::KEY_ID] = $this->getSpIdentifier($request);
-            $entities[Config::MODE_SP][self::KEY_NAME] = $this->getSpName($request);
-        }
-
-        if ($this->mode !== Config::MODE_PROXY && $this->mode !== Config::MODE_MULTI_IDP) {
-            $entities[$this->mode] = $this->config->getSideInfo($this->mode);
-            if (empty($entities[$this->mode][self::KEY_ID]) || empty($entities[$this->mode][self::KEY_NAME])) {
-                Logger::error(self::DEBUG_PREFIX . 'Invalid configuration (id, name) for ' . $this->mode);
-            }
-        }
-
-        if ($this->mode === Config::MODE_MULTI_IDP) {
-            $entities[Config::MODE_IDP] = $this->config->getSideInfo(Config::MODE_IDP);
-            if (empty($entities[Config::MODE_IDP][self::KEY_ID]) || empty($entities[Config::MODE_IDP][self::KEY_NAME])) {
-                Logger::error(self::DEBUG_PREFIX . 'Invalid configuration (id, name) for ' . $this->mode);
-            }
-        }
-
-        return $entities;
     }
 
     private function getEntityDbIdFromEntityIdentifier($table, $entity, $idColumn)
@@ -362,6 +366,80 @@ class DatabaseCommand
         $query .= ' ';
     }
 
+    private function getEntities($request): array
+    {
+        $idpIdentifier = null;
+        $idpName = null;
+        $spIdentifier = null;
+        $spName = null;
+        if ($this->mode !== Config::MODE_IDP && $this->mode !== Config::MODE_MULTI_IDP) {
+            $idpIdentifier = $this->getIdpIdentifier($request);
+            $idpName = $this->getIdpName($request);
+        }
+        if ($this->mode !== Config::MODE_SP) {
+            $spIdentifier = $this->getSpIdentifier($request);
+            $spName = $this->getSpName($request);
+        }
+
+        return $this->prepareEntitiesStructure($idpIdentifier, $idpName, $spIdentifier, $spName);
+    }
+
+    private function prepareEntitiesStructure($idpIdentifier, $idpName, $spName, $spIdentifier): array
+    {
+        $entities = [
+            Config::MODE_IDP => [],
+            Config::MODE_SP => [],
+        ];
+        if ($this->mode !== Config::MODE_IDP && $this->mode !== Config::MODE_MULTI_IDP) {
+            $entities[Config::MODE_IDP][self::KEY_ID] = $idpIdentifier;
+            $entities[Config::MODE_IDP][self::KEY_NAME] = $idpName;
+        }
+        if ($this->mode !== Config::MODE_SP) {
+            $entities[Config::MODE_SP][self::KEY_ID] = $spIdentifier;
+            $entities[Config::MODE_SP][self::KEY_NAME] = $spName;
+        }
+
+        if ($this->mode !== Config::MODE_PROXY && $this->mode !== Config::MODE_MULTI_IDP) {
+            $entities[$this->mode] = $this->config->getSideInfo($this->mode);
+            if (empty($entities[$this->mode][self::KEY_ID]) || empty($entities[$this->mode][self::KEY_NAME])) {
+                Logger::error('Invalid configuration (id, name) for ' . $this->mode);
+            }
+        }
+
+        if ($this->mode === Config::MODE_MULTI_IDP) {
+            $entities[Config::MODE_IDP] = $this->config->getSideInfo(Config::MODE_IDP);
+            if (empty($entities[Config::MODE_IDP][self::KEY_ID]) || empty($entities[Config::MODE_IDP][self::KEY_NAME])) {
+                Logger::error('Invalid configuration (id, name) for ' . $this->mode);
+            }
+        }
+
+        return $entities;
+    }
+
+    private function getIdFromIdentifier($table, $entity, $idColumn)
+    {
+        $identifier = $entity['id'];
+        $name = $entity['name'];
+        $query = 'INSERT INTO ' . $this->tables[$table] . '(identifier, name) VALUES (:identifier, :name1) ';
+        if ($this->conn->getDriver() === 'pgsql') {
+            $query .= 'ON CONFLICT (identifier) DO UPDATE SET name = :name2;';
+        } else {
+            $query .= 'ON DUPLICATE KEY UPDATE name = :name2';
+        }
+        $this->conn->write($query, [
+            'identifier' => $identifier,
+            'name1' => $name,
+            'name2' => $name,
+        ]);
+
+        return $this->read('SELECT ' . $idColumn . ' FROM ' . $this->tables[$table]
+            . ' WHERE identifier=:identifier', [
+                'identifier' => $identifier,
+            ])
+            ->fetchColumn()
+        ;
+    }
+
     private function addDaysRange($days, &$query, &$params, $not = false)
     {
         if ($days !== 0) {    // 0 = all time
@@ -392,12 +470,12 @@ class DatabaseCommand
         }
     }
 
-    private function escape_col($col_name): string
+    private function prependColon($str): string
     {
-        return $this->escape_char . $col_name . $this->escape_char;
+        return ':' . $str;
     }
 
-    private function escape_cols($col_names): string
+    private function escapeCols($col_names): string
     {
         return $this->escape_char . implode(
             $this->escape_char . ',' . $this->escape_char,
@@ -414,7 +492,7 @@ class DatabaseCommand
             }
         }
 
-        return $this->escape_cols($columns);
+        return $this->escapeCols($columns);
     }
 
     private function getIdpIdentifier($request)
