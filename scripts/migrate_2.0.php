@@ -37,7 +37,7 @@ $file = fopen($identityProvidersFileName, 'r');
 
 while (!feof($file)) {
     $line = fgetcsv($file);
-    if (null !== $line) {
+    if ($line !== null) {
         $lineInsert = 'INSERT INTO ' . $tableName . '(year, month, day, sourceIdp, service, count) ' .
             'VALUES(' . $line[0] . ', ' . $line[1] . ', ' . $line[2] . ', "' . $line[3] . '","" , ' . $line[4] . ');' .
             PHP_EOL;
@@ -52,7 +52,7 @@ $file = fopen($serviceProvidersFileName, 'r');
 
 while (!feof($file)) {
     $line = fgetcsv($file);
-    if (null !== $line) {
+    if ($line !== null) {
         $lineInsert = 'INSERT INTO ' . $tableName . '(year, month, day, sourceIdp, service, count) ' .
             'VALUES(' . $line[0] . ', ' . $line[1] . ', ' . $line[2] . ', "", "' . $line[3] . '", ' . $line[4] . ');' .
             PHP_EOL;

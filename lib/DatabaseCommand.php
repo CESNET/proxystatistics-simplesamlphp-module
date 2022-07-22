@@ -13,6 +13,7 @@ use SimpleSAML\Logger;
 class DatabaseCommand
 {
     public const TABLE_SUM = 'statistics_sums';
+
     private const DEBUG_PREFIX = 'proxystatistics:DatabaseCommand - ';
 
     private const TABLE_PER_USER = 'statistics_per_user';
@@ -87,7 +88,7 @@ class DatabaseCommand
             $ids[$tableId] = $this->getEntityDbIdFromEntityIdentifier($table, $entities[$side], $tableId);
         }
 
-        if (false === $this->writeLogin($date, $ids, $userId)) {
+        if ($this->writeLogin($date, $ids, $userId) === false) {
             Logger::error(self::DEBUG_PREFIX . 'login record has not been inserted (data \'' . json_encode([
                 'user' => $userId,
                 'ids' => $ids,
@@ -171,7 +172,7 @@ class DatabaseCommand
                         'day'
                     ) . '), EXTRACT(DAY FROM ' . $this->escape_col('day') . '), ';
                 foreach ($ids as $id) {
-                    $query .= (null === $id ? '0' : $id) . ',';
+                    $query .= ($id === null ? '0' : $id) . ',';
                 }
                 $query .= 'SUM(logins), COUNT(DISTINCT ' . $this->escape_col('user') . ') '
                     . 'FROM ' . $this->tables[self::TABLE_PER_USER] . ' '
@@ -221,7 +222,7 @@ class DatabaseCommand
         $written = $this->conn->write($query, $params);
         if (is_bool($written) && !$written) {
             Logger::warning(self::DEBUG_PREFIX . $msg . ' failed');
-        } elseif (0 === $written) {
+        } elseif ($written === 0) {
             Logger::warning(self::DEBUG_PREFIX . $msg . ' completed, but updated 0 rows.');
         } else {
             Logger::info(self::DEBUG_PREFIX . $msg . ' completed and updated ' . $written . ' rows.');
@@ -272,7 +273,7 @@ class DatabaseCommand
 
             return false;
         }
-        if (0 === $written) {
+        if ($written === 0) {
             Logger::debug(self::DEBUG_PREFIX . 'login entry has been inserted, but has updated 0 rows.');
 
             return false;
@@ -287,23 +288,23 @@ class DatabaseCommand
             Config::MODE_IDP => [],
             Config::MODE_SP => [],
         ];
-        if (Config::MODE_IDP !== $this->mode && Config::MODE_MULTI_IDP !== $this->mode) {
+        if ($this->mode !== Config::MODE_IDP && $this->mode !== Config::MODE_MULTI_IDP) {
             $entities[Config::MODE_IDP][self::KEY_ID] = $this->getIdpIdentifier($request);
             $entities[Config::MODE_IDP][self::KEY_NAME] = $this->getIdpName($request);
         }
-        if (Config::MODE_SP !== $this->mode) {
+        if ($this->mode !== Config::MODE_SP) {
             $entities[Config::MODE_SP][self::KEY_ID] = $this->getSpIdentifier($request);
             $entities[Config::MODE_SP][self::KEY_NAME] = $this->getSpName($request);
         }
 
-        if (Config::MODE_PROXY !== $this->mode && Config::MODE_MULTI_IDP !== $this->mode) {
+        if ($this->mode !== Config::MODE_PROXY && $this->mode !== Config::MODE_MULTI_IDP) {
             $entities[$this->mode] = $this->config->getSideInfo($this->mode);
             if (empty($entities[$this->mode][self::KEY_ID]) || empty($entities[$this->mode][self::KEY_NAME])) {
                 Logger::error(self::DEBUG_PREFIX . 'Invalid configuration (id, name) for ' . $this->mode);
             }
         }
 
-        if (Config::MODE_MULTI_IDP === $this->mode) {
+        if ($this->mode === Config::MODE_MULTI_IDP) {
             $entities[Config::MODE_IDP] = $this->config->getSideInfo(Config::MODE_IDP);
             if (empty($entities[Config::MODE_IDP][self::KEY_ID]) || empty($entities[Config::MODE_IDP][self::KEY_NAME])) {
                 Logger::error(self::DEBUG_PREFIX . 'Invalid configuration (id, name) for ' . $this->mode);
@@ -346,7 +347,7 @@ class DatabaseCommand
             $table = self::TABLE_SIDES[$side];
             $column = self::TABLE_IDS[$table];
             $part = $column;
-            if (null === $value) {
+            if ($value === null) {
                 $part .= '=0';
             } else {
                 $part .= '=:id';
@@ -363,8 +364,8 @@ class DatabaseCommand
 
     private function addDaysRange($days, &$query, &$params, $not = false)
     {
-        if (0 !== $days) {    // 0 = all time
-            if (false === stripos($query, 'WHERE')) {
+        if ($days !== 0) {    // 0 = all time
+            if (stripos($query, 'WHERE') === false) {
                 $query .= 'WHERE';
             } else {
                 $query .= 'AND';
@@ -408,7 +409,7 @@ class DatabaseCommand
     {
         $columns = ['day'];
         foreach ($ids as $id) {
-            if (null !== $id) {
+            if ($id !== null) {
                 $columns[] = $id;
             }
         }
@@ -460,12 +461,12 @@ class DatabaseCommand
 
     private function isPgsql(): bool
     {
-        return 'pgsql' === $this->conn->getDriver();
+        return $this->conn->getDriver() === 'pgsql';
     }
 
     private function isMysql(): bool
     {
-        return 'mysql' === $this->conn->getDriver();
+        return $this->conn->getDriver() === 'mysql';
     }
 
     private function unknownDriver()
