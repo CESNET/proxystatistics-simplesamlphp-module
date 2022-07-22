@@ -1,3 +1,11 @@
+## [7.1.1](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v7.1.0...v7.1.1) (2022-07-22)
+
+
+### Bug Fixes
+
+* 🐛 Fix ECS configuration (after update) ([8aa0c16](https://github.com/CESNET/proxystatistics-simplesamlphp-module/commit/8aa0c1633033ccf2a2b36c26edbd775b74a58fec))
+* 🐛 Fix possible exceptions and refactor code ([c5b5b41](https://github.com/CESNET/proxystatistics-simplesamlphp-module/commit/c5b5b41f1c2cdcda06a0460f59c84e4187cb2fe1))
+
 # [7.1.0](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v7.0.2...v7.1.0) (2022-07-22)
 
 
