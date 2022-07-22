@@ -1,3 +1,16 @@
+# [8.0.0](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v7.1.1...v8.0.0) (2022-07-22)
+
+
+### Features
+
+* 🎸 API write ([44e507a](https://github.com/CESNET/proxystatistics-simplesamlphp-module/commit/44e507aef480a9a029243fe92d61183cbc6b4776))
+
+
+### BREAKING CHANGES
+
+* Requires at least PHP v7.3 or higher (due to usage of
+JSON_THROW_ON_ERROR constant)
+
 ## [7.1.1](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v7.1.0...v7.1.1) (2022-07-22)
 
 
