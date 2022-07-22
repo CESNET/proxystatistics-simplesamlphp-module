@@ -26,7 +26,7 @@ class Statistics extends ProcessingFilter
         $dateTime = new DateTime();
         $dbCmd = new DatabaseCommand();
         try {
-            $dbCmd->insertLogin($request, $dateTime);
+            $dbCmd->insertLoginFromFilter($request, $dateTime);
         } catch (Exception $ex) {
             Logger::error(
                 self::DEBUG_PREFIX . 'Caught exception while inserting login into statistics: ' . $ex->getMessage()

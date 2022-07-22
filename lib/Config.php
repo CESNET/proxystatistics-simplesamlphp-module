@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\Module\proxystatistics;
 
 use SimpleSAML\Configuration;
+use SimpleSAML\Error\Exception;
 
 class Config
 {
@@ -34,6 +35,12 @@ class Config
 
     private const KEEP_PER_USER = 'keepPerUser';
 
+    private const API_WRITE_ENABLED = 'apiWriteEnabled';
+
+    private const API_WRITE_USERNAME = 'apiWriteUsername';
+
+    private const API_WRITE_PASSWORD_HASH = 'apiWritePasswordHash';
+
     private $config;
 
     private $store;
@@ -50,6 +57,12 @@ class Config
 
     private $idAttribute;
 
+    private $apiWriteEnabled;
+
+    private $apiWriteUsername;
+
+    private $apiWritePasswordHash;
+
     private static $instance;
 
     private function __construct()
@@ -62,6 +75,17 @@ class Config
         $this->keepPerUser = $this->config->getIntegerRange(self::KEEP_PER_USER, 31, 1827, 31);
         $this->requiredAuthSource = $this->config->getString(self::REQUIRE_AUTH_SOURCE, '');
         $this->idAttribute = $this->config->getString(self::USER_ID_ATTRIBUTE, 'uid');
+        $this->apiWriteEnabled = $this->config->getBoolean(self::API_WRITE_ENABLED, false);
+        if ($this->apiWriteEnabled) {
+            $this->apiWriteUsername = $this->config->getString(self::API_WRITE_USERNAME);
+            if (empty(trim($this->apiWriteUsername))) {
+                throw new Exception('Username for API write cannot be empty');
+            }
+            $this->apiWritePasswordHash = $this->config->getString(self::API_WRITE_PASSWORD_HASH);
+            if (empty(trim($this->apiWritePasswordHash))) {
+                throw new Exception('Password for API write cannot be empty');
+            }
+        }
     }
 
     private function __clone()
@@ -122,5 +146,20 @@ class Config
     public function getKeepPerUser()
     {
         return $this->keepPerUser;
+    }
+
+    public function isApiWriteEnabled()
+    {
+        return $this->apiWriteEnabled;
+    }
+
+    public function getApiWriteUsername()
+    {
+        return $this->apiWriteUsername;
+    }
+
+    public function getApiWritePasswordHash()
+    {
+        return $this->apiWritePasswordHash;
     }
 }

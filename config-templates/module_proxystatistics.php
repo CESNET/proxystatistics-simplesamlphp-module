@@ -87,4 +87,19 @@ $config = [
      * For how many days should the detailed statistics be kept. Minimum is 31.
      */
     //'keepPerUser' => 62,
+
+    /*
+     * Enables ability to write via an API
+     */
+    //'apiWriteEnabled' => true,
+
+    /*
+     * Username to protect API write endpoint (has no effect if write is disabled)
+     */
+    //'apiWriteUsername' => 'api_writer',
+
+    /*
+     * Password to protect API write endpoint (has no effect if write is disabled)
+     */
+    //'apiWritePasswordHash' => password_hash('ap1Wr1T3rP@S$'),
 ];

@@ -73,3 +73,26 @@ Once you have installed SimpleSAMLphp, installing this module is very simple. Fi
 ```
 'instance_name' => 'Instance name',
 ```
+
+### Writing via API
+#### Configuration
+Add the following (and adjust the credentials) to enable writing via the API (example request following). Methods supported are `POST,PUT`.
+```
+  'apiWriteEnabled' => true,
+  'apiWriteUsername' => 'api_writer',
+  'apiWritePasswordHash' => password_hash('ap1Wr1T3rP@S$'),
+```
+#### Example request
+```
+curl --request POST \
+  --url https://proxy.com/proxy/module.php/proxystatistics/writeLoginApi.php \
+  --header 'Authorization: Basic encodedCredentials' \
+  --header 'Content-Type: application/json' \
+  --data '{
+	"userId": "user@somewhere.edu",
+	"serviceIdentifier": "https://service.com/shibboleth",
+	"serviceName": "TEST_SERVICE",
+	"idpIdentifier": "https://idp.org/simplesamlphp",
+	"idpName": "TEST_IDP"
+}'
+```
