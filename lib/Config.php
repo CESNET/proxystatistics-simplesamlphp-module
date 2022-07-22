@@ -20,6 +20,8 @@ class Config
 
     public const MODE_PROXY = 'PROXY';
 
+    private const KNOWN_MODES = ['PROXY', 'IDP', 'SP', 'MULTI_IDP'];
+
     private const STORE = 'store';
 
     private const MODE = 'mode';
@@ -40,6 +42,14 @@ class Config
 
     private $sourceIdpEntityIdAttribute;
 
+    private $tables;
+
+    private $keepPerUser;
+
+    private $requiredAuthSource;
+
+    private $idAttribute;
+
     private static $instance;
 
     private function __construct()
@@ -47,15 +57,18 @@ class Config
         $this->config = Configuration::getConfig(self::CONFIG_FILE_NAME);
         $this->store = $this->config->getConfigItem(self::STORE, null);
         $this->tables = $this->config->getArray('tables', []);
-        $this->mode = $this->config->getValueValidate(self::MODE, ['PROXY', 'IDP', 'SP', 'MULTI_IDP'], 'PROXY');
         $this->sourceIdpEntityIdAttribute = $this->config->getString(self::SOURCE_IDP_ENTITY_ID_ATTRIBUTE, '');
+        $this->mode = $this->config->getValueValidate(self::MODE, self::KNOWN_MODES, self::MODE_PROXY);
+        $this->keepPerUser = $this->config->getIntegerRange(self::KEEP_PER_USER, 31, 1827, 31);
+        $this->requiredAuthSource = $this->config->getString(self::REQUIRE_AUTH_SOURCE, '');
+        $this->idAttribute = $this->config->getString(self::USER_ID_ATTRIBUTE, 'uid');
     }
 
     private function __clone()
     {
     }
 
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (null === self::$instance) {
             self::$instance = new self();
@@ -81,7 +94,7 @@ class Config
 
     public function getIdAttribute()
     {
-        return $this->config->getString(self::USER_ID_ATTRIBUTE, 'uid');
+        return $this->idAttribute;
     }
 
     public function getSourceIdpEntityIdAttribute()
@@ -89,9 +102,11 @@ class Config
         return $this->sourceIdpEntityIdAttribute;
     }
 
-    public function getSideInfo($side)
+    public function getSideInfo(string $side)
     {
-        assert(in_array($side, [self::SIDES], true));
+        if (!in_array($side, self::SIDES, true)) {
+            throw new \Exception('Unrecognized side parameter value passed \'' . $side . '\'.');
+        }
 
         return array_merge([
             'name' => '',
@@ -101,11 +116,11 @@ class Config
 
     public function getRequiredAuthSource()
     {
-        return $this->config->getString(self::REQUIRE_AUTH_SOURCE, '');
+        return$this->requiredAuthSource;
     }
 
     public function getKeepPerUser()
     {
-        return $this->config->getIntegerRange(self::KEEP_PER_USER, 31, 1827, 31);
+        return $this->keepPerUser;
     }
 }

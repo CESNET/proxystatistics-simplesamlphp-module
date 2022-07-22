@@ -10,6 +10,8 @@ use SimpleSAML\XHTML\Template;
 
 class Templates
 {
+    private const DEBUG_PREFIX = 'proxystatistics:Templates - ';
+
     private const INSTANCE_NAME = 'instance_name';
 
     public static function showProviders($side, $tab)
@@ -95,7 +97,7 @@ class Templates
         }
         $t->data['head'] .= Utils::metaData('translations', $translations);
 
-        $name = $dbCmd->getNameById($side, $id);
+        $name = $dbCmd->getEntityNameByEntityIdentifier($side, $id);
         $t->data['header'] = $t->t('{proxystatistics:stats:' . $side . 'Detail_header_name}') . $name;
 
         $t->data['htmlinject']['htmlContentPost'][]
@@ -148,7 +150,9 @@ class Templates
         if (null !== $instanceName) {
             $t->data['header'] = $instanceName . ' ' . $t->data['header'];
         } else {
-            Logger::warning('Missing configuration: config.php - instance_name is not set.');
+            Logger::warning(
+                self::DEBUG_PREFIX . 'missing configuration option in config.php - instance_name is not set.'
+            );
         }
 
         self::headIncludes($t);
