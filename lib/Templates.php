@@ -141,13 +141,13 @@ class Templates
             'SP' => 'id="tab-3" href="' . self::getFullUrl('serviceProviders.php') . '?lastDays=' . $lastDays . '"',
         ];
         $mode = $config->getMode();
-        if (Config::MODE_PROXY !== $mode) {
+        if ($mode !== Config::MODE_PROXY) {
             $t->data['tabsAttributes'][$mode] = 'class="hidden" ' . $t->data['tabsAttributes'][$mode];
         }
 
         $t->data['header'] = $t->t('{proxystatistics:stats:statistics_header}');
         $instanceName = Configuration::getInstance()->getString(self::INSTANCE_NAME, null);
-        if (null !== $instanceName) {
+        if ($instanceName !== null) {
             $t->data['header'] = $instanceName . ' ' . $t->data['header'];
         } else {
             Logger::warning(
@@ -192,7 +192,7 @@ class Templates
                 '!side_on' => $t->t('{proxystatistics:stats:chart_legend_side_on_' . $side . '}'),
             ]
         );
-        if (Config::MODE_SP === $side && Config::MODE_SP !== $mode) {
+        if ($side === Config::MODE_SP && $mode !== Config::MODE_SP) {
             echo ' ';
             echo $t->t(
                 '{proxystatistics:stats:first_access_only}',
@@ -211,7 +211,7 @@ class Templates
         $mode = Config::getInstance()->getMode();
         $t->data['mode'] = $mode;
         $t->data['summaryGraphs'] = [];
-        if (Config::MODE_PROXY === $mode || Config::MODE_MULTI_IDP === $mode) {
+        if ($mode === Config::MODE_PROXY || $mode === Config::MODE_MULTI_IDP) {
             foreach (Config::SIDES as $side) {
                 $t->data['summaryGraphs'][$side] = [];
                 $t->data['summaryGraphs'][$side]['Providers'] = 'col-md-6 graph';

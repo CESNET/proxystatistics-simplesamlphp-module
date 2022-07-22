@@ -70,7 +70,7 @@ class Config
 
     public static function getInstance(): self
     {
-        if (null === self::$instance) {
+        if (self::$instance === null) {
             self::$instance = new self();
         }
 
@@ -116,7 +116,7 @@ class Config
 
     public function getRequiredAuthSource()
     {
-        return$this->requiredAuthSource;
+        return $this->requiredAuthSource;
     }
 
     public function getKeepPerUser()
