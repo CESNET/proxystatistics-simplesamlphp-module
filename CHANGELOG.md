@@ -1,3 +1,10 @@
+# [7.1.0](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v7.0.2...v7.1.0) (2022-07-22)
+
+
+### Features
+
+* 🎸 Customizable IdPEnityID location (from attribute) ([7d5d85e](https://github.com/CESNET/proxystatistics-simplesamlphp-module/commit/7d5d85ee21507051dd7906f34469c05b172ffe18))
+
 ## [7.0.2](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v7.0.1...v7.0.2) (2022-04-04)
 
 
