@@ -56,7 +56,7 @@ class Config
     {
         $this->config = Configuration::getConfig(self::CONFIG_FILE_NAME);
         $this->store = $this->config->getConfigItem(self::STORE, null);
-        $this->tables = $this->config->getArray('tables', []);;
+        $this->tables = $this->config->getArray('tables', []);
         $this->sourceIdpEntityIdAttribute = $this->config->getString(self::SOURCE_IDP_ENTITY_ID_ATTRIBUTE, '');
         $this->mode = $this->config->getValueValidate(self::MODE, self::KNOWN_MODES, self::MODE_PROXY);
         $this->keepPerUser = $this->config->getIntegerRange(self::KEEP_PER_USER, 31, 1827, 31);

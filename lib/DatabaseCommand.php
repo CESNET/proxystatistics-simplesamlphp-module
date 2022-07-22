@@ -289,11 +289,11 @@ class DatabaseCommand
         ];
         if (Config::MODE_IDP !== $this->mode && Config::MODE_MULTI_IDP !== $this->mode) {
             $entities[Config::MODE_IDP][self::KEY_ID] = $this->getIdpIdentifier($request);
-            $entities[Config::MODE_IDP][self::KEY_NAME] =$this->getIdpName($request);
+            $entities[Config::MODE_IDP][self::KEY_NAME] = $this->getIdpName($request);
         }
         if (Config::MODE_SP !== $this->mode) {
             $entities[Config::MODE_SP][self::KEY_ID] = $this->getSpIdentifier($request);
-            $entities[Config::MODE_SP][self::KEY_NAME] =$this->getSpName($request);
+            $entities[Config::MODE_SP][self::KEY_NAME] = $this->getSpName($request);
         }
 
         if (Config::MODE_PROXY !== $this->mode && Config::MODE_MULTI_IDP !== $this->mode) {
@@ -320,7 +320,7 @@ class DatabaseCommand
         $query = 'INSERT INTO ' . $this->tables[$table] . '(identifier, name) VALUES (:identifier, :name1) ';
         if ($this->isPgsql()) {
             $query .= 'ON CONFLICT (identifier) DO UPDATE SET name = :name2;';
-        } else if ($this->isMysql()) {
+        } elseif ($this->isMysql()) {
             $query .= 'ON DUPLICATE KEY UPDATE name = :name2';
         } else {
             $this->unknownDriver();
