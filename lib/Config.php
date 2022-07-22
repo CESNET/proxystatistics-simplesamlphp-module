@@ -26,6 +26,8 @@ class Config
 
     private const USER_ID_ATTRIBUTE = 'userIdAttribute';
 
+    private const SOURCE_IDP_ENTITY_ID_ATTRIBUTE = 'sourceIdpEntityIdAttribute';
+
     private const REQUIRE_AUTH_SOURCE = 'requireAuth.source';
 
     private const KEEP_PER_USER = 'keepPerUser';
@@ -36,6 +38,8 @@ class Config
 
     private $mode;
 
+    private $sourceIdpEntityIdAttribute;
+
     private static $instance;
 
     private function __construct()
@@ -44,6 +48,7 @@ class Config
         $this->store = $this->config->getConfigItem(self::STORE, null);
         $this->tables = $this->config->getArray('tables', []);
         $this->mode = $this->config->getValueValidate(self::MODE, ['PROXY', 'IDP', 'SP', 'MULTI_IDP'], 'PROXY');
+        $this->sourceIdpEntityIdAttribute = $this->config->getString(self::SOURCE_IDP_ENTITY_ID_ATTRIBUTE, '');
     }
 
     private function __clone()
@@ -77,6 +82,11 @@ class Config
     public function getIdAttribute()
     {
         return $this->config->getString(self::USER_ID_ATTRIBUTE, 'uid');
+    }
+
+    public function getSourceIdpEntityIdAttribute()
+    {
+        return $this->sourceIdpEntityIdAttribute;
     }
 
     public function getSideInfo($side)
