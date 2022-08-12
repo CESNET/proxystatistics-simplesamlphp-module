@@ -1,3 +1,10 @@
+# [8.1.0](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v8.0.0...v8.1.0) (2022-08-12)
+
+
+### Features
+
+* 🎸 Make methods for reading DB public ([957c87e](https://github.com/CESNET/proxystatistics-simplesamlphp-module/commit/957c87e724d561e432dfb90dbc4c18d784701762))
+
 # [8.0.0](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v7.1.1...v8.0.0) (2022-07-22)
 
 
