@@ -242,6 +242,34 @@ class DatabaseCommand
         }
     }
 
+    public function read($query, $params): PDOStatement
+    {
+        return $this->conn->read($query, $params);
+    }
+
+    public function isPgsql(): bool
+    {
+        return $this->conn->getDriver() === 'pgsql';
+    }
+
+    public function isMysql(): bool
+    {
+        return $this->conn->getDriver() === 'mysql';
+    }
+
+    public function escapeCol($col_name): string
+    {
+        return $this->escape_char . $col_name . $this->escape_char;
+    }
+
+    public function escapeCols($col_names): string
+    {
+        return $this->escape_char . implode(
+            $this->escape_char . ',' . $this->escape_char,
+            $col_names
+        ) . $this->escape_char;
+    }
+
     private function insertLogin($entities, $userId, $date)
     {
         foreach (Config::SIDES as $side) {
@@ -263,11 +291,6 @@ class DatabaseCommand
         if ($this->writeLogin($date, $ids, $userId) === false) {
             Logger::error(self::DEBUG_PREFIX . 'The login log was not inserted.');
         }
-    }
-
-    private function escapeCol($col_name): string
-    {
-        return $this->escape_char . $col_name . $this->escape_char;
     }
 
     private function writeLogin($date, $ids, $user): bool
@@ -475,14 +498,6 @@ class DatabaseCommand
         return ':' . $str;
     }
 
-    private function escapeCols($col_names): string
-    {
-        return $this->escape_char . implode(
-            $this->escape_char . ',' . $this->escape_char,
-            $col_names
-        ) . $this->escape_char;
-    }
-
     private function getAggregateGroupBy($ids): string
     {
         $columns = ['day'];
@@ -530,21 +545,6 @@ class DatabaseCommand
         }
 
         return $displayName;
-    }
-
-    private function read($query, $params): PDOStatement
-    {
-        return $this->conn->read($query, $params);
-    }
-
-    private function isPgsql(): bool
-    {
-        return $this->conn->getDriver() === 'pgsql';
-    }
-
-    private function isMysql(): bool
-    {
-        return $this->conn->getDriver() === 'mysql';
     }
 
     private function unknownDriver()
