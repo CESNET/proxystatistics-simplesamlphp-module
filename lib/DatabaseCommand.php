@@ -82,20 +82,6 @@ class DatabaseCommand
         $entities = $this->getEntities($request);
         $userId = $this->getUserId($request);
         $this->insertLogin($entities, $userId, $date);
-
-        $ids = [];
-        foreach (self::TABLE_SIDES as $side => $table) {
-            $tableId = self::TABLE_IDS[$table];
-            $ids[$tableId] = $this->getEntityDbIdFromEntityIdentifier($table, $entities[$side], $tableId);
-        }
-
-        if (!$this->writeLogin($date, $ids, $userId)) {
-            Logger::error(self::DEBUG_PREFIX . 'login record has not been inserted (data \'' . json_encode([
-                'user' => $userId,
-                'ids' => $ids,
-                'date' => $date,
-            ]) . '\'.');
-        }
     }
 
     public function insertLoginFromApi($data, DateTime $date)
@@ -407,7 +393,7 @@ class DatabaseCommand
         return $this->prepareEntitiesStructure($idpIdentifier, $idpName, $spIdentifier, $spName);
     }
 
-    private function prepareEntitiesStructure($idpIdentifier, $idpName, $spName, $spIdentifier): array
+    private function prepareEntitiesStructure($idpIdentifier, $idpName, $spIdentifier, $spName): array
     {
         $entities = [
             Config::MODE_IDP => [],
