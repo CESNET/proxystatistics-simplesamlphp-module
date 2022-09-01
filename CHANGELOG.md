@@ -1,3 +1,10 @@
+## [8.1.1](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v8.1.0...v8.1.1) (2022-09-01)
+
+
+### Bug Fixes
+
+* 🐛 Fix parameters ordering and duplicate insert ([ceef3ee](https://github.com/CESNET/proxystatistics-simplesamlphp-module/commit/ceef3ee26903a8febe9488961b465afcc274b5b3))
+
 # [8.1.0](https://github.com/CESNET/proxystatistics-simplesamlphp-module/compare/v8.0.0...v8.1.0) (2022-08-12)
 
 
