@@ -4,6 +4,8 @@
 [![CI](https://github.com/CESNET/proxystatistics-simplesamlphp-module/actions/workflows/build_and_check.yml/badge.svg)](https://github.com/CESNET/proxystatistics-simplesamlphp-module/actions/workflows/build_and_check.yml)
 [![License](https://poser.pugx.org/cesnet/simplesamlphp-module-proxystatistics/license)](https://packagist.org/packages/cesnet/simplesamlphp-module-proxystatistics)
 
+**REPOSITORY HAS BEEN MOVED TO: https://gitlab.ics.muni.cz/perun-proxy-aai/simplesamlphp/simplesamlphp-module-proxystatistics**
+
 Module for simpleSAMLphp which shows Proxy IdP/SP statistics
 
 ## Contribution
